@@ -1,12 +1,13 @@
 # NEXUS — Beyond Control
-> Plataforma educativa en TI para Medellín · Tecnológico de Antioquia
+ Plataforma educativa en TI para Medellín · Tecnológico de Antioquia
 
-## 🚀 Cómo ejecutar el proyecto
+## Cómo ejecutar el proyecto
 
 ### Requisitos previos
 - [Node.js](https://nodejs.org/) v16 o superior
 - npm (viene incluido con Node.js)
 - Visual Studio Code (recomendado)
+- Nota: desarrollado con react.js
 
 ### Pasos para iniciar
 
@@ -22,7 +23,7 @@ Abre [http://localhost:3000](http://localhost:3000) en tu navegador.
 
 ---
 
-## 📁 Estructura del proyecto
+## Estructura del proyecto
 
 ```
 nexus-app/
@@ -45,7 +46,7 @@ nexus-app/
 └── package.json
 ```
 
-## 🎨 Paleta de colores
+## Paleta de colores
 
 | Variable            | Valor     | Uso                        |
 |---------------------|-----------|----------------------------|
@@ -55,10 +56,4 @@ nexus-app/
 | `--accent-orange`   | `#FF6B35` | Datos / dinamismo          |
 | `--bg-deep`         | `#060B14` | Fondo profundo             |
 
-## 🔧 Extensiones VSCode recomendadas
-
-- **ES7+ React/Redux/React-Native snippets**
-- **Prettier - Code formatter**
-- **CSS Modules**
-- **Auto Rename Tag**
 # Nexus
