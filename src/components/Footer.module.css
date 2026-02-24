@@ -1,0 +1,34 @@
+.footer {
+  position: relative;
+  z-index: 1;
+  border-top: 1px solid var(--border);
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.brand {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 16px;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+}
+
+.brand span { color: var(--accent-cyan); }
+
+.note {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  opacity: 0.5;
+}
+
+.faint { opacity: 0.25; }
+
+@media (max-width: 900px) {
+  .footer { padding: 28px 24px; flex-direction: column; gap: 12px; text-align: center; }
+}
