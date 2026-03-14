@@ -1,5 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import styles from './CtaBanner.module.css';
+import { Link } from 'react-router-dom';
+
 
 export default function CtaBanner() {
   const ref = useRef(null);
@@ -27,9 +29,10 @@ export default function CtaBanner() {
           tecnológicas y profesionales en la ciudad. Sin barreras, sin costos.
         </p>
       </div>
+
       <div className={styles.actions}>
-        <a href="#" className={styles.btnPrimary}>Registrarme ahora</a>
-        <a href="#" className={styles.btnSecondary}>Soy docente</a>
+                <Link to="/registro" className={styles.btnPrimary}>Registrarme ahora</Link>
+        <Link to="/ser-docente" className={styles.btnSecondary}>  Soy docente</Link>
       </div>
     </div>
   );

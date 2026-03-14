@@ -1,0 +1,192 @@
+/* --- CONTENEDOR PRINCIPAL --- */
+.dashboard-admin {
+    background-color: #0a0b10;
+    min-height: 100vh;
+    color: white;
+    font-family: 'Segoe UI', Roboto, sans-serif;
+}
+
+/* --- BARRA DE NAVEGACIÓN (ADMIN NAVBAR) --- */
+.admin-navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 50px;
+    height: 70px;
+    background-color: #0d1117;
+    border-bottom: 1px solid #30363d;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.admin-logo {
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.admin-tag {
+    color: #00e5ff;
+    font-size: 10px;
+    padding: 3px 10px;
+    border: 1px solid #00e5ff;
+    border-radius: 20px;
+    margin-left: 10px;
+    text-transform: uppercase;
+}
+
+.admin-menu {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+
+/* --- BOTONES DE MENÚ --- */
+.nav-btn, .nav-btn-active {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 5px;
+    transition: all 0.3s ease;
+}
+
+.nav-btn {
+    color: #8b949e;
+}
+
+.nav-btn:hover {
+    color: #f0f6fc;
+}
+
+.nav-btn-active {
+    color: #00e5ff;
+    border-bottom: 2px solid #00e5ff;
+}
+
+.logout-btn {
+    background: transparent;
+    color: #f85149;
+    border: 1px solid #f85149;
+    padding: 8px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.logout-btn:hover {
+    background: rgba(248, 81, 73, 0.1);
+    box-shadow: 0 0 12px rgba(248, 81, 73, 0.2);
+}
+
+/* --- CONTENIDO DINÁMICO --- */
+.admin-content {
+    padding: 40px 50px;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.admin-title {
+    margin-bottom: 40px;
+    font-weight: 300;
+    font-size: 28px;
+    color: #f0f6fc;
+}
+
+/* --- TARJETAS DE MÉTRICAS --- */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 25px;
+}
+
+.metric-card {
+    background-color: #161b22;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+    transition: transform 0.3s ease;
+}
+
+.metric-card:hover {
+    transform: translateY(-5px);
+}
+
+.card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.card-title {
+    font-size: 12px;
+    color: #8b949e;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-weight: bold;
+}
+
+.card-icon {
+    font-size: 22px;
+}
+
+.card-value {
+    font-size: 32px;
+    font-weight: 800;
+    color: #ffffff;
+}
+
+/* --- SECCIÓN DE ACTIVIDAD --- */
+.recent-activity {
+    margin-top: 50px;
+    padding: 30px;
+    background-color: #161b22;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+}
+
+.activity-header {
+    margin: 0 0 20px 0;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #30363d;
+    font-size: 18px;
+    color: #f0f6fc;
+}
+
+.activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.activity-list li {
+    padding: 12px 0;
+    color: #8b949e;
+    font-size: 14px;
+    border-bottom: 1px solid rgba(48, 54, 61, 0.5);
+}
+
+.activity-list li:last-child {
+    border-bottom: none;
+}
+
+/* --- ANIMACIONES --- */
+.section-fade {
+    animation: slideUpFade 0.6s ease forwards;
+}
+
+@keyframes slideUpFade {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

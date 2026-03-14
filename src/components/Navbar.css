@@ -1,0 +1,99 @@
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 5%;
+    background: #060b13; /* Fondo oscuro profundo */
+    height: 80px;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    border-bottom: 1px solid rgba(0, 229, 255, 0.2);
+    box-sizing: border-box;
+}
+
+/* Estilo del Logo e Icono */
+.nav-brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.brand-box {
+    width: 30px;
+    height: 30px;
+    border: 1px solid #00e5ff;
+    border-radius: 6px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 10px rgba(0, 229, 255, 0.2);
+}
+
+.brand-dot {
+    width: 4px;
+    height: 4px;
+    background: #00e5ff;
+    border-radius: 50%;
+}
+
+.brand-text {
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
+
+.cyan-text {
+    color: #00e5ff;
+}
+
+/* Enlaces de Navegación */
+.nav-links {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.nav-item {
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    transition: 0.3s;
+}
+
+.nav-item:hover, .nav-item.active {
+    color: white;
+}
+
+/* Botón Ingresar (Estilo imagen image_a27c23) */
+.login-btn-styled {
+    background: #00e5ff;
+    color: #060b13 !important;
+    padding: 8px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 800;
+    font-size: 0.8rem;
+    transition: 0.3s;
+}
+
+.login-btn-styled:hover {
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.5);
+    transform: translateY(-1px);
+}
+
+.logout-btn {
+    background: transparent;
+    border: 1px solid #ff4d4d;
+    color: #ff4d4d;
+    padding: 6px 15px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.75rem;
+}

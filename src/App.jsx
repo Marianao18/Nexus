@@ -1,38 +1,114 @@
-import React, { useEffect } from 'react';
-import Background from './components/Background';
-import Navbar     from './components/Navbar';
-import Hero       from './components/Hero';
-import Stats      from './components/Stats';
-import Features   from './components/Features';
-import Rutas      from './components/Rutas';
-import CtaBanner  from './components/CtaBanner';
-import Footer     from './components/Footer';
+import React, { useEffect, useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Background from './components/Background.jsx';
+import Navbar     from './components/Navbar.jsx';
+import Footer     from './components/Footer.jsx';
+import Hero        from './components/Hero.jsx';
+import Stats       from './components/Stats.jsx';
+import Features    from './components/Features.jsx';
+import Rutas       from './components/Rutas.jsx';
+import CtaBanner   from './components/CtaBanner.jsx';
+import Registro          from './components/Registro.jsx';
+import Login             from './components/Login.jsx';
+import SolicitudDocente from './components/SolicitudDocente.jsx';
+import HomeAdm           from './components/HomeAdm.jsx';
+import AdminSolicitudes from './components/AdminSolicitudes.jsx';
 
-export default function App() {
-  
-  useEffect(() => {
-    const observer = new IntersectionObserver(
-      entries => entries.forEach(e => {
-        if (e.isIntersecting) e.target.classList.add('visible');
-      }),
-      { threshold: 0.12 }
-    );
-    document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-    return () => observer.disconnect();
-  }, []);
+const ProtectedRoute = ({ userRole, children }) => {
+    if (!userRole) {
+        return <Navigate to="/login" replace />;
+    }
+    const normalizedRole = userRole.toLowerCase();
+    if (!normalizedRole.includes('admin')) {
+        return <Navigate to="/login" replace />;
+    }
+    return children;
+};
 
-  return (
+const HomePage = () => (
     <>
-      <Background />
-      <Navbar />
-      <main>
         <Hero />
         <Stats />
         <Features />
         <Rutas />
         <CtaBanner />
-      </main>
-      <Footer />
     </>
-  );
+);
+
+export default function App() {
+    const [userRole, setUserRole] = useState(localStorage.getItem('rol'));
+
+    useEffect(() => {
+        const syncAuth = () => {
+            setUserRole(localStorage.getItem('rol'));
+        };
+
+        window.addEventListener('storage', syncAuth);
+        // Evento personalizado para cambios en la misma pestaña
+        window.addEventListener('authChange', syncAuth);
+        
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                    }
+                });
+            },
+            { threshold: 0.15 }
+        );
+
+        const revealElements = document.querySelectorAll('.reveal');
+        revealElements.forEach(el => observer.observe(el));
+
+        return () => {
+            window.removeEventListener('storage', syncAuth);
+            window.removeEventListener('authChange', syncAuth);
+            observer.disconnect();
+        };
+    }, []);
+
+    const isAdminView = userRole && userRole.toLowerCase().includes('admin');
+
+    return (
+        <Router>
+            <div className="app-wrapper" style={{ position: 'relative' }}>
+                <Background />
+                {!isAdminView && <Navbar />}
+
+                <main style={{ 
+                    minHeight: '85vh', 
+                    paddingTop: !isAdminView ? '80px' : '0' 
+                }}>
+                    <Routes>
+                        <Route path="/" element={<HomePage />} />
+                        <Route path="/registro" element={<Registro />} />
+                        <Route path="/ser-docente" element={<SolicitudDocente />} /> 
+                        <Route path="/login" element={
+                            isAdminView ? <Navigate to="/admin-dashboard" replace /> : <Login />
+                        } />
+                        <Route 
+                            path="/admin-dashboard" 
+                            element={
+                                <ProtectedRoute userRole={userRole}>
+                                    <HomeAdm />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route 
+                            path="/AdminSolicitudes" 
+                            element={
+                                <ProtectedRoute userRole={userRole}>
+                                    <AdminSolicitudes />
+                                </ProtectedRoute>
+                            } 
+                        />
+                        <Route path="*" element={<Navigate to="/" replace />} />
+                    </Routes>
+                </main>
+
+                {!isAdminView && <Footer />}
+            </div>
+        </Router>
+    );
 }
