@@ -1,195 +1,346 @@
-<div align="center">
+# NEXUS — Beyond Control
+### Plataforma Educativa en TI · Medellín, Colombia · 2026
 
-<img src="https://img.shields.io/badge/NEXUS-Beyond%20Control-00E5FF?style=for-the-badge&labelColor=060B14" alt="NEXUS"/>
-
-# ◈ NEXUS — Beyond Control
-
-**Plataforma educativa en Tecnologías de la Información**  
-Desarrollada para Medellín · Tecnológico de Antioquia
-
-[![Django](https://img.shields.io/badge/Django-4.2-092E20?style=flat-square&logo=django&logoColor=white)](https://djangoproject.com)
-[![React](https://img.shields.io/badge/React-18-61DAFB?style=flat-square&logo=react&logoColor=black)](https://react.dev)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169E1?style=flat-square&logo=postgresql&logoColor=white)](https://postgresql.org)
-[![Python](https://img.shields.io/badge/Python-3.13-3776AB?style=flat-square&logo=python&logoColor=white)](https://python.org)
-[![JWT](https://img.shields.io/badge/JWT-Auth-000000?style=flat-square&logo=jsonwebtokens)](https://jwt.io)
-
-</div>
+![NEXUS](https://img.shields.io/badge/NEXUS-Beyond%20Control-00E5FF?style=for-the-badge&logoColor=white)
+![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)
+![React](https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?style=for-the-badge&logo=postgresql&logoColor=white)
 
 ---
 
-## ⚡ Stack tecnológico
+## 📌 Descripción
+
+NEXUS es una plataforma educativa que centraliza el conocimiento en desarrollo de software para estudiantes técnicos, tecnológicos y profesionales de Medellín. Ofrece rutas de aprendizaje, microlearning e IA que se adapta al estudiante.
+
+---
+
+## 🗂️ Estructura del Proyecto
+
+```
+Nexus-integrado/
+├── nexus-backend/          # API REST con Django
+└── Nexus-main/             # Frontend con React
+```
+
+---
+
+## ⚙️ Stack Tecnológico
 
 | Capa | Tecnología |
-|------|-----------|
-| **Frontend** | React.js · React Router |
-| **Backend** | Django 4.2 · Django REST Framework |
-| **Base de datos** | PostgreSQL 15 |
-| **Autenticación** | JWT · djangorestframework-simplejwt |
-| **CORS** | django-cors-headers |
+|---|---|
+| Frontend | React 18 + React Router v6 |
+| Backend | Django 4.2 + Django REST Framework |
+| Base de datos | PostgreSQL 15 |
+| Autenticación | JWT (SimpleJWT) |
+| Estilos | CSS Modules + CSS Variables |
+| HTTP Client | Axios |
 
 ---
 
-## 🗂 Estructura del proyecto
-
-```
-NEXUS-PROJECT/
-├── backend/                    # Servidor Django (Python)
-│   ├── apps/
-│   │   ├── usuarios/           # Registro, login, JWT
-│   │   └── solicitudes/        # Flujo docentes y recuperación de contraseña
-│   ├── nexus/                  # Configuración principal (settings.py)
-│   ├── manage.py
-│   ├── requirements.txt
-│   ├── .env                    # 🔒 Variables privadas (no se sube)
-│   └── .env.example            # Plantilla para colaboradores
-│
-└── src/                        # Frontend React
-    ├── components/
-    │   ├── Background.jsx / .css
-    │   ├── Navbar.jsx / .css
-    │   ├── Hero.jsx / .css
-    │   ├── Login.jsx / .css
-    │   ├── Registro.jsx / .css
-    │   ├── RecuperarPassword.jsx / .css   ← nuevo
-    │   ├── RestablecerPassword.jsx / .css ← nuevo
-    │   ├── Terminal.jsx / .css
-    │   ├── Stats.jsx / .css
-    │   ├── Features.jsx / .css
-    │   ├── Rutas.jsx / .css
-    │   ├── CtaBanner.jsx / .css
-    │   └── Footer.jsx / .css
-    ├── App.jsx                 # Componente raíz y rutas
-    ├── index.js                # Punto de entrada
-    └── index.css               # Estilos globales y variables de color
-```
-
----
-
-## 🚀 Instalación y configuración
+## 🚀 Instalación y Configuración Local
 
 ### Prerrequisitos
 
-- Python 3.10 o superior
-- Node.js v16 o superior
+- Python 3.11+
+- Node.js 18+
 - PostgreSQL 15
+- Git
 
 ---
 
-### 🔧 Backend (Django)
+### 1. Clonar el repositorio
 
-**1. Clonar el repositorio**
 ```bash
-git clone https://github.com/Marianao18/Nexus.git
-cd Nexus/backend
+git clone https://github.com/tu-usuario/nexus-integrado.git
+cd nexus-integrado
 ```
 
-**2. Crear y activar el entorno virtual**
+---
+
+### 2. Backend — Django
+
+#### Crear y activar entorno virtual
+
 ```bash
+cd nexus-backend
+
 # Windows
 python -m venv venv
 .\venv\Scripts\activate
 
-# macOS / Linux
-python3 -m venv venv
+# Mac/Linux
+python -m venv venv
 source venv/bin/activate
 ```
 
-**3. Instalar dependencias**
+#### Instalar dependencias
+
 ```bash
 pip install -r requirements.txt
 ```
 
-**4. Configurar variables de entorno**
+#### Configurar variables de entorno
 
-Crea un archivo `.env` en la raíz del backend:
+Crea un archivo `.env` en `nexus-backend/` basándote en `.envejemplo`:
+
 ```env
-SECRET_KEY=nexus-clave-super-secreta-cambia-esto
+SECRET_KEY=django-secret-key-nexus-2026
 DEBUG=True
 
-# Base de datos
 DB_NAME=nexus_db
 DB_USER=nexus_user
-DB_PASSWORD=tu_password_de_postgres
+DB_PASSWORD=nexus_pass
 DB_HOST=localhost
 DB_PORT=5432
 
-# Correo (Gmail App Password)
 EMAIL_HOST_USER=tu_correo@gmail.com
-EMAIL_HOST_PASSWORD=tu_codigo_de_16_letras_de_google
+EMAIL_HOST_PASSWORD=tu_app_password
 ```
 
-**5. Crear la base de datos en PostgreSQL**
+#### Crear la base de datos en PostgreSQL
+
 ```sql
 CREATE DATABASE nexus_db;
-CREATE USER nexus_user WITH PASSWORD 'tu_password';
+CREATE USER nexus_user WITH PASSWORD 'nexus_pass';
 GRANT ALL PRIVILEGES ON DATABASE nexus_db TO nexus_user;
-GRANT ALL ON SCHEMA public TO nexus_user;
 ```
 
-**6. Aplicar migraciones y crear superusuario**
+#### Aplicar migraciones
+
 ```bash
+python manage.py makemigrations
 python manage.py migrate
+```
+
+#### Crear superusuario administrador
+
+```bash
 python manage.py createsuperuser
 ```
 
-**7. Arrancar el servidor**
+#### Correr el servidor
+
 ```bash
 python manage.py runserver
 ```
-> El backend corre en `http://localhost:8000`
+
+El backend queda disponible en `http://localhost:8000`
 
 ---
 
-### 🎨 Frontend (React)
+### 3. Frontend — React
+
+Abre una **nueva terminal**:
 
 ```bash
-cd Nexus/src
+cd Nexus-main
+
+# Instalar dependencias
 npm install
+
+# Correr la app
 npm start
+```
+
+El frontend queda disponible en `http://localhost:3000`
+
+> El `package.json` incluye `"proxy": "http://localhost:8000"` para redirigir las llamadas `/api/` al backend automáticamente.
+
+---
+
+## 👥 Roles y Flujos
+
+### 🔐 Admin
+- Inicia sesión con las credenciales del superusuario
+- Aprueba o rechaza solicitudes de docentes
+- Crea cursos y los asigna a docentes registrados
+- Gestiona usuarios (estudiantes y docentes)
+
+### 👨‍🏫 Docente
+- Se registra desde la landing page (`/ser-docente`)
+- Tras ser aprobado por el admin puede iniciar sesión
+- Ve los cursos que le fueron asignados
+- Sube recursos (PDF, DOCX, XLSX, CSV) a sus cursos
+- Ve el progreso de sus estudiantes por curso
+
+### 🎓 Estudiante
+- Se registra desde la landing page (`/registro`)
+- Explora el catálogo de cursos disponibles
+- Se inscribe en los cursos de su interés
+- Hace seguimiento a su progreso y rutas de aprendizaje
+- Interactúa con NEXIA, el asistente virtual de IA
+
+---
+
+## 🗺️ Endpoints de la API
+
+### Autenticación
+| Método | Endpoint | Descripción |
+|---|---|---|
+| POST | `/api/login/` | Iniciar sesión |
+| POST | `/api/logout/` | Cerrar sesión |
+| POST | `/api/registrar-estudiante/` | Registro de estudiante |
+| POST | `/api/solicitud-docente/` | Solicitud de registro docente |
+
+### Admin
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/admin/solicitudes/` | Listar solicitudes de docentes |
+| POST | `/api/admin/aprobar-docente/<id>/` | Aprobar docente |
+| POST | `/api/admin/rechazar-docente/<id>/` | Rechazar docente |
+| GET | `/api/admin/usuarios/` | Listar estudiantes y docentes |
+| GET | `/api/admin/cursos/` | Listar todos los cursos |
+| POST | `/api/admin/cursos/` | Crear un curso |
+| PATCH | `/api/admin/cursos/<id>/` | Activar/desactivar curso |
+| DELETE | `/api/admin/cursos/<id>/` | Eliminar curso |
+| GET | `/api/admin/docentes/` | Listar docentes aprobados |
+
+### Estudiante
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/estudiante/resumen/` | Métricas del dashboard |
+| GET | `/api/estudiante/cursos/` | Mis cursos inscritos |
+| GET | `/api/estudiante/rutas/` | Mis rutas activas |
+| GET | `/api/estudiante/progreso/` | Progreso por curso |
+| POST | `/api/cursos/catalogo/` | Catálogo de cursos disponibles |
+| POST | `/api/cursos/inscribirse/` | Inscribirse en un curso |
+
+### Docente
+| Método | Endpoint | Descripción |
+|---|---|---|
+| GET | `/api/docente/resumen/` | Métricas del docente |
+| GET | `/api/docente/cursos/` | Cursos asignados |
+| GET | `/api/docente/cursos/<id>/estudiantes/` | Estudiantes por curso |
+| GET | `/api/docente/cursos/<id>/recursos/` | Recursos del curso |
+| POST | `/api/docente/cursos/<id>/recursos/` | Subir recurso |
+| DELETE | `/api/docente/recursos/<id>/` | Eliminar recurso |
+
+---
+
+## 🗄️ Modelos de Base de Datos
+
+```
+Usuario          → Rol: admin / docente / estudiante
+├── Solicitud    → Solicitudes de registro de docentes
+├── Curso        → Cursos creados por el admin, asignados a docente
+│   ├── Modulo       → Módulos del curso
+│   └── Recurso      → Archivos subidos por el docente (PDF, DOCX, XLSX, CSV)
+├── Inscripcion  → Relación estudiante ↔ curso
+├── InscripcionRuta → Relación estudiante ↔ ruta
+├── RutaAprendizaje → Agrupación de cursos
+└── ModuloCompletado → Progreso del estudiante
 ```
 
 ---
 
-## 🔌 Endpoints de la API
+## 📁 Estructura de Carpetas
 
-| Método | Endpoint | Acceso | Descripción |
-|--------|----------|--------|-------------|
-| `POST` | `/api/registrar-estudiante/` | Público | Registro de estudiantes |
-| `POST` | `/api/login/` | Público | Inicio de sesión |
-| `GET`  | `/api/perfil/` | 🔒 JWT | Datos del usuario autenticado |
-| `POST` | `/api/solicitud-docente/` | Público | Enviar solicitud para ser docente |
-| `GET`  | `/api/admin/solicitudes/` | 👑 Admin | Ver solicitudes pendientes |
-| `POST` | `/api/admin/aprobar-docente/{id}/` | 👑 Admin | Aprobar solicitud de docente |
-| `POST` | `/api/admin/rechazar-docente/{id}/` | 👑 Admin | Rechazar solicitud de docente |
-| `POST` | `/api/password-reset/` | Público | Solicitar recuperación de clave |
-| `POST` | `/api/confirmar-password/` | Público | Establecer nueva clave con UID y Token |
+### Backend
+```
+nexus-backend/
+├── apps/
+│   ├── usuarios/        # Registro, login, JWT, perfiles
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   ├── urls.py
+│   │   └── serializers.py
+│   ├── solicitudes/     # Solicitudes de docentes
+│   │   ├── models.py
+│   │   ├── views.py
+│   │   └── urls.py
+│   └── cursos/          # Cursos, módulos, inscripciones, recursos
+│       ├── models.py
+│       ├── views.py
+│       ├── urls.py
+│       └── serializers.py
+├── nexus/
+│   ├── settings.py
+│   └── urls.py
+├── media/               # Archivos subidos por docentes
+├── requirements.txt
+├── manage.py
+└── .env
+```
+
+### Frontend
+```
+Nexus-main/
+├── public/
+└── src/
+    ├── components/
+    │   ├── HomeAdm.jsx          # Dashboard administrador
+    │   ├── HomeDocente.jsx      # Dashboard docente
+    │   ├── HomeEstudiante.jsx   # Dashboard estudiante
+    │   ├── NexIA.jsx            # Asistente virtual IA
+    │   ├── RutasPage.jsx        # Catálogo de rutas públicas
+    │   ├── Login.jsx
+    │   ├── Registro.jsx
+    │   ├── SolicitudDocente.jsx
+    │   ├── AdminSolicitudes.jsx
+    │   ├── AdminUsuarios.jsx
+    │   ├── Navbar.jsx
+    │   ├── Hero.jsx
+    │   └── ...
+    ├── App.jsx
+    └── index.js
+```
 
 ---
 
-## 👥 Roles de usuario
+## 🤖 NEXIA — Asistente Virtual
 
-| Rol | Cómo se crea | Acceso |
-|-----|-------------|--------|
-| 🎓 **Estudiante** | Formulario `/registro` | Landing Page |
-| 📚 **Docente** | Solicitud aprobada por admin | Landing Page |
-| 🔑 **Administrador** | `python manage.py createsuperuser` | Panel Admin |
+NEXIA es el asistente de IA integrado en el dashboard del estudiante. Actualmente responde con lógica basada en palabras clave sobre los cursos, progreso y recomendaciones de estudio.
+
+**Próxima versión:** Integración con API de IA (Groq/Claude/OpenAI) para respuestas naturales con contexto real del estudiante.
 
 ---
 
-## 🎨 Paleta de colores
+## 🎨 Cursos Disponibles en NEXUS
 
-| Variable | Color | Uso |
-|----------|-------|-----|
-| `--accent-cyan` | ![#00E5FF](https://img.shields.io/badge/-00E5FF-00E5FF?style=flat-square) `#00E5FF` | Acento principal / tech |
-| `--accent-lime` | ![#A3FF4F](https://img.shields.io/badge/-A3FF4F-A3FF4F?style=flat-square) `#A3FF4F` | Aprendizaje / acceso libre |
-| `--accent-purple` | ![#7B5CFA](https://img.shields.io/badge/-7B5CFA-7B5CFA?style=flat-square) `#7B5CFA` | IA / personalización |
-| `--accent-orange` | ![#FF6B35](https://img.shields.io/badge/-FF6B35-FF6B35?style=flat-square) `#FF6B35` | Datos / dinamismo |
-| `--bg-deep` | ![#060B14](https://img.shields.io/badge/-060B14-060B14?style=flat-square) `#060B14` | Fondo profundo |
+| Curso | Tecnología | Nivel |
+|---|---|---|
+| Análisis de Datos con Power BI | Power BI | Básico → Avanzado |
+| Análisis de Datos con Python | Python | Intermedio |
+| Excel en Todos sus Niveles | Excel | Básico → Avanzado |
+| Desarrollo con Java Spring Boot | Java | Intermedio → Avanzado |
+| Desarrollo Backend con Django | Django | Básico → Avanzado |
+| Bases de Datos con PostgreSQL | PostgreSQL | Básico → Avanzado |
+| Bases de Datos con MongoDB | MongoDB | Básico → Intermedio |
+
+---
+
+## 🔒 Variables de Entorno
+
+| Variable | Descripción | Ejemplo |
+|---|---|---|
+| `SECRET_KEY` | Clave secreta Django | `django-secret-key-...` |
+| `DEBUG` | Modo debug | `True` |
+| `DB_NAME` | Nombre de la BD | `nexus_db` |
+| `DB_USER` | Usuario de la BD | `nexus_user` |
+| `DB_PASSWORD` | Contraseña de la BD | `nexus_pass` |
+| `DB_HOST` | Host de la BD | `localhost` |
+| `DB_PORT` | Puerto de la BD | `5432` |
+| `EMAIL_HOST_USER` | Correo para envíos | `tu@gmail.com` |
+| `EMAIL_HOST_PASSWORD` | App password Gmail | `xxxx xxxx xxxx` |
+
+---
+
+## 🤝 Contribución
+
+1. Haz fork del repositorio
+2. Crea tu rama: `git checkout -b feature/nueva-funcionalidad`
+3. Haz commit: `git commit -m 'feat: agregar nueva funcionalidad'`
+4. Push: `git push origin feature/nueva-funcionalidad`
+5. Abre un Pull Request
+
+---
+
+## 📄 Licencia
+
+Desarrollado con 💙 por Mariana Y Lina · Tecnológico de Antioquia · Medellín, Colombia
 
 ---
 
 <div align="center">
-
-Desarrollado con 💙 por Mariana Y Lina · Tecnológico de Antioquia · Medellín, Colombia
-
+  <strong>NEX<span style="color:#00E5FF">US</span></strong> · Beyond Control · Medellín 2026
 </div>
