@@ -1,0 +1,16 @@
+# Entorno Virtual
+venv/
+env/
+ENV/
+
+# Archivos de configuración sensible (¡Súper importante!)
+.env
+
+# Archivos compilados de Python
+*.pyc
+__pycache__/
+db.sqlite3
+
+# Archivos del sistema y de VS Code
+.vscode/
+.DS_Store

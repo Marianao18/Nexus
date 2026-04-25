@@ -1,0 +1,161 @@
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    width: 100vw;
+    background-color: #0a0b10;
+}
+
+.login-card {
+    padding: 40px;
+    background-color: #161b22;
+    border-radius: 12px;
+    color: white;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+    border: 1px solid #30363d;
+}
+
+.login-header {
+    text-align: center;
+}
+
+.login-title {
+    margin: 0 0 5px 0;
+    font-size: 26px;
+    letter-spacing: 3px;
+    font-weight: 800;
+}
+
+.login-title span {
+    color: #00e5ff;
+}
+
+.login-subtitle {
+    color: #8b949e;
+    font-size: 12px;
+    margin-bottom: 30px;
+    text-transform: uppercase;
+}
+
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.login-input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.login-label {
+    font-size: 11px;
+    color: #c9d1d9;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.login-input {
+    padding: 14px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+    background-color: #0d1117;
+    color: white;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s;
+}
+
+.login-input:focus {
+    border-color: #00e5ff;
+}
+
+.login-button {
+    padding: 16px;
+    color: #0a0b10;
+    border: none;
+    border-radius: 8px;
+    font-weight: 900;
+    text-transform: uppercase;
+    margin-top: 10px;
+    transition: 0.3s;
+    background-color: #00e5ff;
+    cursor: pointer;
+}
+
+.login-button:disabled {
+    background-color: #30363d;
+    cursor: not-allowed;
+    color: #8b949e;
+}
+
+.login-button:not(:disabled):hover {
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+    transform: translateY(-1px);
+}
+
+.login-error-box {
+    background-color: rgba(248, 81, 73, 0.1);
+    color: #f85149;
+    padding: 10px;
+    border-radius: 8px;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 13px;
+    border: 1px solid rgba(248, 81, 73, 0.2);
+}
+
+/* --- Nueva Sección Footer y Link --- */
+.login-footer {
+    margin-top: 20px;
+    text-align: center;
+    border-top: 1px solid #30363d;
+    padding-top: 15px;
+}
+
+.forgot-password-link {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+}
+
+.forgot-password-link span {
+    color: #00e5ff;
+    font-weight: bold;
+    margin-left: 5px;
+}
+
+.forgot-password-link:hover {
+    color: #c9d1d9;
+}
+
+.forgot-password-link:hover span {
+    text-shadow: 0 0 10px rgba(0, 229, 255, 0.6);
+    text-decoration: underline;
+}
+
+/* --- Reglas de contraseña --- */
+.password-rules {
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.password-rules p {
+    margin: 3px 0;
+}
+
+.valid {
+    color: #00e676;
+}
+
+.invalid {
+    color: #ff5252;
+}
