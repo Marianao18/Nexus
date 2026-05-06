@@ -453,7 +453,7 @@ const SectionPerfil = ({ userName, userEmail, initials }) => {
             return;
         }
         try {
-            await axios.post('/api/cambiar-password-perfil/',
+            await axios.post('http://localhost:8000/api/usuarios/cambiar-password-perfil/',
                 { password_actual: pass.actual, nueva_password: pass.nueva },
                 authHeaders()
             );

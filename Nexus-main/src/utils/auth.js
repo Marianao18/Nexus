@@ -1,5 +1,3 @@
-
-
 import axios from 'axios';
 
 const API_URL = 'http://localhost:8000/api';
@@ -59,6 +57,9 @@ export const isAuthenticated = () => !!localStorage.getItem('access_token');
  *   setupAxiosInterceptors();
  */
 export const setupAxiosInterceptors = () => {
+    // ESTA ES LA LÍNEA AGREGADA: Configura la URL base para todas las peticiones
+    axios.defaults.baseURL = 'http://localhost:8000';
+
     // Request: agrega el token a cada petición
     axios.interceptors.request.use(
         (config) => {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-
+import './AdminUsuarios.css';
 const authHeaders = () => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
 });
@@ -12,13 +12,53 @@ const AdminUsuarios = () => {
     const [tab,     setTab]     = useState('estudiantes');
 
     useEffect(() => {
-        axios.get('/api/admin/usuarios/', authHeaders())
-            .then(res => setData(res.data))
-            .catch(() => setError('No se pudieron cargar los usuarios.'))
+        axios.get('http://localhost:8000/api/usuarios/admin/usuarios/', authHeaders())
+            .then(res => {
+                console.log("Datos recibidos:", res.data); 
+                setData(res.data);
+            })
+            .catch((err) => {
+                console.error("Error detallado:", err);
+                setError('No se pudieron cargar los usuarios.');
+            })
             .finally(() => setLoading(false));
     }, []);
 
     const usuarios = tab === 'estudiantes' ? data.estudiantes : data.docentes;
+
+    const eliminarUsuario = async (id, nombre) => {
+
+    const confirmar = window.confirm(
+        `¿Deseas eliminar a ${nombre}?`
+    );
+
+    if (!confirmar) return;
+
+    try {
+
+        await axios.delete(
+            `http://localhost:8000/api/usuarios/admin/eliminar-usuario/${id}/`,
+            authHeaders()
+        );
+
+        // Actualizar tabla automáticamente
+        setData(prev => ({
+            ...prev,
+            [tab]: prev[tab].filter(user => user.id !== id)
+        }));
+
+        alert('Usuario eliminado correctamente');
+
+    } catch (error) {
+
+        console.error(error);
+
+        alert(
+            error.response?.data?.error ||
+            'No se pudo eliminar el usuario'
+        );
+    }
+};
 
     const tabStyle = (activo) => ({
         padding: '8px 20px',
@@ -79,6 +119,7 @@ const AdminUsuarios = () => {
                                 <th className="na-th">Rol</th>
                                 <th className="na-th">Estado</th>
                                 <th className="na-th">Fecha registro</th>
+                                <th className="na-th">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -114,6 +155,14 @@ const AdminUsuarios = () => {
                                         {new Date(user.fecha_registro).toLocaleDateString('es-CO', {
                                             day:'2-digit', month:'short', year:'numeric'
                                         })}
+                                    </td>
+                                    <td className="na-td">
+
+                                    <button
+                                        className="na-btn-delete"
+                                        onClick={() => eliminarUsuario(user.id, user.nombre)}>
+                                        Eliminar
+                                    </button>
                                     </td>
                                 </tr>
                             )) : (

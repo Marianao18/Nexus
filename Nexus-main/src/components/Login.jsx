@@ -19,7 +19,7 @@ const Login = () => {
         localStorage.clear();
 
         try {
-        const res = await axios.post('/api/login/',{
+        const res = await axios.post('/api/usuarios/login/',{
         email: email.trim().toLowerCase(),
         password
         });

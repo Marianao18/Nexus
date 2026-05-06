@@ -221,3 +221,5 @@ class ConfirmarPasswordView(APIView):
 
         except (TypeError, ValueError, OverflowError, Usuario.DoesNotExist):
             return Response({"error": "Datos de recuperación inválidos."}, status=status.HTTP_400_BAD_REQUEST)
+        
+

@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import './AdminSolicitudes.css';
 
 const AdminSolicitudes = () => {
     const [solicitudes, setSolicitudes] = useState([]);
     const [cargando, setCargando] = useState(true);
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
 
     // 1. CARGAR SOLICITUDES AL MONTAR
     useEffect(() => {
         const cargarDatos = async () => {
             try {
-                const res = await axios.get('http://localhost:8000/api/admin/solicitudes/', {
+                const res = await axios.get('http://localhost:8000/api/solicitudes/admin/solicitudes/', {
                     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
                 });
                 setSolicitudes(res.data);
@@ -27,7 +30,7 @@ const AdminSolicitudes = () => {
         if (window.confirm("¿Deseas convertir a este postulante en docente oficial?")) {
             try {
                 const res = await axios.post(
-                    `http://localhost:8000/api/admin/aprobar-docente/${id}/`,
+                    `http://localhost:8000/api/solicitudes/admin/aprobar-docente/${id}/`,
                     {},
                     {
                         headers: {
@@ -60,7 +63,7 @@ const AdminSolicitudes = () => {
         if (window.confirm("¿Estás seguro de rechazar esta solicitud? Se enviará un correo de notificación.")) {
             try {
                 // Asumiendo que creamos la ruta /api/admin/rechazar-docente en el index.js
-                const res = await axios.post(`http://localhost:8000/api/admin/rechazar-docente/${id}/`, {}, {
+                const res = await axios.post(`http://localhost:8000/api/solicitudes/admin/rechazar-docente/${id}/`, {}, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
                 });
                 alert(res.data.mensaje);
@@ -73,22 +76,43 @@ const AdminSolicitudes = () => {
         }
     };
 
+const verMas = (solicitud) => {
+    setSolicitudSeleccionada(solicitud);
+    setModalAbierto(true);
+};
+
     if (cargando) return <p style={{ color: '#00e5ff', padding: '20px' }}>Consultando base de datos de NEXUS...</p>;
     
 
     return (
+    <>
         <div className="na-table-container na-fade-in">
-            <div className="na-section-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 className="na-section-title" style={{ margin: 0, color: '#fff' }}>
+
+            <div
+                className="na-section-header"
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px'
+                }}
+            >
+                <h3
+                    className="na-section-title"
+                    style={{ margin: 0, color: '#fff' }}
+                >
                     Bandeja de Entrada de Postulaciones
                 </h3>
+
                 <span className="na-badge-pending">
                     {solicitudes.length} Pendientes
                 </span>
             </div>
 
             <div className="na-table-wrapper">
+
                 <table className="na-table">
+
                     <thead>
                         <tr>
                             <th className="na-th">Nombre del Postulante</th>
@@ -97,45 +121,181 @@ const AdminSolicitudes = () => {
                             <th className="na-th">Acciones</th>
                         </tr>
                     </thead>
+
                     <tbody>
+
                         {solicitudes.length > 0 ? (
+
                             solicitudes.map((sol) => (
-                                <tr key={sol.id} className="na-table-row">
-                                    <td className="na-td">{sol.nombre_completo}</td>
+
+                                <tr
+                                    key={sol.id}
+                                    className="na-table-row"
+                                >
+
                                     <td className="na-td">
-                                        <span className="na-specialty-tag">{sol.especialidad}</span>
+                                        {sol.nombre_completo}
                                     </td>
-                                    <td className="na-td">{sol.email}</td>
+
                                     <td className="na-td">
-                                        <div style={{ display: 'flex', gap: '8px' }}>
+                                        <span className="na-specialty-tag">
+                                            {sol.especialidad}
+                                        </span>
+                                    </td>
+
+                                    <td className="na-td">
+                                        {sol.email}
+                                    </td>
+
+                                    <td className="na-td">
+
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                gap: '8px'
+                                            }}
+                                        >
+
                                             <button
                                                 onClick={() => aprobar(sol.id)}
                                                 className="na-btn-approve"
                                             >
                                                 Aprobar
                                             </button>
+
                                             <button
                                                 onClick={() => rechazar(sol.id)}
                                                 className="na-btn-reject"
                                             >
                                                 Rechazar
                                             </button>
+
+                                            <button
+                                                onClick={() => verMas(sol)}
+                                                className="na-btn-view"
+                                            >
+                                                Ver más
+                                            </button>
+
                                         </div>
+
                                     </td>
+
                                 </tr>
+
                             ))
+
                         ) : (
+
                             <tr>
-                                <td colSpan="4" className="na-empty-msg">
+                                <td
+                                    colSpan="4"
+                                    className="na-empty-msg"
+                                >
                                     No hay solicitudes nuevas por el momento.
                                 </td>
                             </tr>
+
                         )}
+
                     </tbody>
+
                 </table>
+
             </div>
+
         </div>
-    );
+
+        {/* MODAL */}
+
+        {modalAbierto && solicitudSeleccionada && (
+
+            <div
+                className="na-modal-overlay"
+                onClick={() => setModalAbierto(false)}
+            >
+
+                <div
+                    className="na-modal"
+                    onClick={(e) => e.stopPropagation()}
+                >
+
+                    <div className="na-modal-header">
+
+                        <h2>Perfil del Postulante</h2>
+
+                        <button
+                            className="na-close-btn"
+                            onClick={() => setModalAbierto(false)}
+                        >
+                            ✕
+                        </button>
+
+                    </div>
+
+                    <div className="na-modal-content">
+
+                        <div className="na-info-group">
+                            <label>Nombre completo</label>
+
+                            <p>
+                                {solicitudSeleccionada.nombre_completo}
+                            </p>
+                        </div>
+
+                        <div className="na-info-group">
+                            <label>Correo electrónico</label>
+
+                            <p>
+                                {solicitudSeleccionada.email}
+                            </p>
+                        </div>
+
+                        <div className="na-info-group">
+                            <label>Especialidad</label>
+
+                            <p>
+                                {solicitudSeleccionada.especialidad}
+                            </p>
+                        </div>
+
+                        <div className="na-info-group">
+
+                            <label>Certificación</label>
+
+                            <button
+                                className="na-btn-link"
+                                onClick={() =>
+                                    window.open(
+                                        solicitudSeleccionada.link_certificacion,
+                                        '_blank'
+                                    )
+                                }
+                            >
+                                Ver certificación
+                            </button>
+
+                        </div>
+
+                        <div className="na-info-group">
+
+                            <label>Mensaje de motivación</label>
+
+                            <div className="na-message-box">
+                                {solicitudSeleccionada.mensaje_motivacion}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        )}
+    </>
+);
 };
 
 // --- ESTILOS PARA MANTENER LA ESTÉTICA NEXUS ---
@@ -149,8 +309,6 @@ const styles = {
     tr: { borderBottom: '1px solid #30363d' },
     td: { padding: '15px', color: '#c9d1d9' },
     especialidadTag: { backgroundColor: '#00e5ff22', color: '#00e5ff', padding: '4px 8px', borderRadius: '4px', fontSize: '13px' },
-    btnApprove: { backgroundColor: '#238636', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', marginRight: '10px', fontWeight: 'bold' },
-    btnReject: { backgroundColor: 'transparent', color: '#f85149', border: '1px solid #f85149', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontWeight: 'bold' },
     noData: { padding: '40px', textAlign: 'center', color: '#8b949e' }
 };
 

@@ -123,3 +123,124 @@ class AdminUsuariosView(APIView):
             'estudiantes': list(estudiantes),
             'docentes':    list(docentes),
         })
+    
+class RegistroEstudianteView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        # Extraemos los datos que vienen del componente React
+        nombre = request.data.get('nombre')
+        email = request.data.get('email')
+        password = request.data.get('password')
+
+        # Validación básica
+        if not email or not password:
+            return Response(
+                {"error": "Email y contraseña son obligatorios"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if Usuario.objects.filter(email=email).exists():
+            return Response(
+                {"email": "Este correo ya existe"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        try:
+            # Creamos el usuario con rol estudiante
+            user = Usuario.objects.create_user(
+                email=email,
+                nombre=nombre,
+                password=password,
+                rol='estudiante'
+            )
+            return Response(
+                {"mensaje": "Estudiante creado con éxito"}, 
+                status=status.HTTP_201_CREATED
+            )
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, 
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+        
+
+class CambiarPasswordObligatorioView(APIView):
+    permission_classes = [IsAuthenticated] # Requiere token
+
+    def post(self, request):
+        nueva_password = request.data.get('nueva_password')
+        usuario = request.user
+        
+        if nueva_password:
+            usuario.set_password(nueva_password)
+            # Si usas el campo de cambio obligatorio, aquí lo desactivamos
+            # usuario.debe_cambiar_password = False 
+            usuario.save()
+            return Response({"mensaje": "Password actualizado"}, status=status.HTTP_200_OK)
+        
+        return Response({"error": "Faltan datos"}, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+class CambiarPasswordPerfilView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        user = request.user
+        password_actual = request.data.get('password_actual')
+        nueva_password = request.data.get('nueva_password')
+
+        # 1. Validar que la contraseña actual sea correcta
+        if not user.check_password(password_actual):
+            return Response({'error': 'La contraseña actual es incorrecta.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 2. Cambiar la contraseña
+        user.set_password(nueva_password)
+        user.save()
+        
+        return Response({'mensaje': 'Contraseña actualizada correctamente.'}, status=status.HTTP_200_OK)
+    
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from rest_framework import status
+
+from .models import Usuario
+
+
+class EliminarUsuarioView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, id):
+
+        # Validar admin
+        if request.user.rol != 'admin':
+            return Response(
+                {'error': 'No autorizado'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        try:
+            usuario = Usuario.objects.get(id=id)
+
+            # Evitar que el admin se elimine a sí mismo
+            if usuario.id == request.user.id:
+                return Response(
+                    {'error': 'No puedes eliminar tu propia cuenta'},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+            usuario.delete()
+
+            return Response(
+                {'mensaje': 'Usuario eliminado correctamente'},
+                status=status.HTTP_200_OK
+            )
+
+        except Usuario.DoesNotExist:
+            return Response(
+                {'error': 'Usuario no encontrado'},
+                status=status.HTTP_404_NOT_FOUND
+            )

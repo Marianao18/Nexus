@@ -1,5 +1,7 @@
 from django.db import models
 import uuid
+from django.contrib import admin
+
 
 class SolicitudDocente(models.Model):
     ESTADO_CHOICES = [

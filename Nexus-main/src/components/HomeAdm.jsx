@@ -187,8 +187,8 @@ const VistaCursos = () => {
         setLoading(true);
         try {
             const [cRes, dRes] = await Promise.all([
-                axios.get('/api/admin/cursos/', authHeaders()),
-                axios.get('/api/admin/docentes/', authHeaders()),
+                axios.get('/api/cursos/admin/cursos/', authHeaders()),
+                axios.get('/api/cursos/admin/docentes/', authHeaders()),
             ]);
             setCursos(cRes.data);
             setDocentes(dRes.data);

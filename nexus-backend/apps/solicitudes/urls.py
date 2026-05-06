@@ -5,7 +5,8 @@ from .views import (
     AprobarDocenteView,
     RechazarDocenteView,
     RecuperarPasswordView,
-    ConfirmarPasswordView
+    ConfirmarPasswordView,
+
 )
 
 urlpatterns = [

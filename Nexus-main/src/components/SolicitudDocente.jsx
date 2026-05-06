@@ -8,14 +8,23 @@ const SolicitudDocente = () => {
     const [especialidad, setEspecialidad] = useState('');
     const [link, setLink] = useState('');
     const [mensaje, setMensaje] = useState('');
-    const [respuestaServidor, setRespuestaServidor] = useState('');
+    const [respuestaServidor, setRespuestaServidor] = useState({ texto: '', esError: false });
+    const [cargando, setCargando] = useState(false);
 
     const enviarSolicitud = async (e) => {
         e.preventDefault();
-        setRespuestaServidor('');
+        
+        // Validación manual adicional antes de enviar
+        if (nombre.trim().length < 3) {
+            setRespuestaServidor({ texto: "El nombre es demasiado corto", esError: true });
+            return;
+        }
+
+        setCargando(true);
+        setRespuestaServidor({ texto: '', esError: false });
 
         try {
-            const res = await axios.post('http://localhost:8000/api/solicitud-docente/', {
+            const res = await axios.post('/api/solicitudes/solicitud-docente/', {
                 nombre_completo: nombre,
                 email: email,
                 especialidad: especialidad,
@@ -23,10 +32,16 @@ const SolicitudDocente = () => {
                 mensaje_motivacion: mensaje
             });
 
-            setRespuestaServidor(res.data.mensaje);
+            // Éxito
+            setRespuestaServidor({ texto: res.data.mensaje, esError: false });
+            // Limpiar formulario
             setNombre(''); setEmail(''); setEspecialidad(''); setLink(''); setMensaje('');
         } catch (err) {
-            setRespuestaServidor(err.response?.data?.error || "Error al enviar la solicitud");
+            // Error
+            const mensajeError = err.response?.data?.error || "Error de conexión con el servidor";
+            setRespuestaServidor({ texto: mensajeError, esError: true });
+        } finally {
+            setCargando(false);
         }
     };
 
@@ -45,7 +60,9 @@ const SolicitudDocente = () => {
                         value={nombre} 
                         onChange={(e) => setNombre(e.target.value)} 
                         required 
+                        minLength="3"
                         className="solicitud-input"
+                        disabled={cargando}
                     />
                     
                     <input 
@@ -55,6 +72,7 @@ const SolicitudDocente = () => {
                         onChange={(e) => setEmail(e.target.value)} 
                         required 
                         className="solicitud-input"
+                        disabled={cargando}
                     />
                     
                     <input 
@@ -64,6 +82,7 @@ const SolicitudDocente = () => {
                         onChange={(e) => setEspecialidad(e.target.value)} 
                         required 
                         className="solicitud-input"
+                        disabled={cargando}
                     />
                     
                     <input 
@@ -72,6 +91,7 @@ const SolicitudDocente = () => {
                         value={link} 
                         onChange={(e) => setLink(e.target.value)} 
                         className="solicitud-input"
+                        disabled={cargando}
                     />
                     
                     <textarea 
@@ -79,17 +99,24 @@ const SolicitudDocente = () => {
                         rows="4"
                         value={mensaje}
                         onChange={(e) => setMensaje(e.target.value)}
+                        required
+                        minLength="10"
                         className="solicitud-textarea"
+                        disabled={cargando}
                     />
 
-                    <button type="submit" className="btn-enviar">
-                        Enviar Postulación
+                    <button 
+                        type="submit" 
+                        className={`btn-enviar ${cargando ? 'btn-disabled' : ''}`}
+                        disabled={cargando}
+                    >
+                        {cargando ? "Enviando..." : "Enviar Postulación"}
                     </button>
                 </form>
 
-                {respuestaServidor && (
-                    <div className="respuesta-mensaje">
-                        {respuestaServidor}
+                {respuestaServidor.texto && (
+                    <div className={`respuesta-mensaje ${respuestaServidor.esError ? 'error' : 'exito'}`}>
+                        {respuestaServidor.texto}
                     </div>
                 )}
             </div>
