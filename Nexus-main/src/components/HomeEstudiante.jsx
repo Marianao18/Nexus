@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './HomeEstudiante.css';
 import NexIA from './NexIA';
+import { useNavigate } from 'react-router-dom';
+
+
 
 const authHeaders = () => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
@@ -310,6 +313,7 @@ const SectionCursos = () => {
     const [cursos,  setCursos]  = useState([]);
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
+    const navigate = useNavigate();
 
     useEffect(() => {
         axios.get('/api/estudiante/cursos/', authHeaders())
@@ -348,7 +352,7 @@ const SectionCursos = () => {
                                     <span>{curso.modulos_completados}/{curso.modulos_total} módulos</span>
                                     <span style={{color: curso.color}}>{curso.progreso}%</span>
                                 </div>
-                                <button className="est-btn-outline" style={{borderColor: curso.color, color: curso.color}}>
+                                <button className="est-btn-outline" style={{borderColor: curso.color, color: curso.color}} onClick={() => navigate(`/curso/${curso.id}/ver`)}>
                                     {curso.progreso === 0 ? 'Comenzar' : curso.progreso === 100 ? 'Revisar' : 'Continuar'}
                                 </button>
                             </div>
@@ -453,7 +457,7 @@ const SectionPerfil = ({ userName, userEmail, initials }) => {
             return;
         }
         try {
-            await axios.post('http://localhost:8000/api/usuarios/cambiar-password-perfil/',
+            await axios.post('/api/cambiar-password-perfil/',
                 { password_actual: pass.actual, nueva_password: pass.nueva },
                 authHeaders()
             );

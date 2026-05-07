@@ -187,8 +187,8 @@ const VistaCursos = () => {
         setLoading(true);
         try {
             const [cRes, dRes] = await Promise.all([
-                axios.get('/api/cursos/admin/cursos/', authHeaders()),
-                axios.get('/api/cursos/admin/docentes/', authHeaders()),
+                axios.get('/api/admin/cursos/', authHeaders()),
+                axios.get('/api/admin/docentes/', authHeaders()),
             ]);
             setCursos(cRes.data);
             setDocentes(dRes.data);
@@ -210,7 +210,7 @@ const VistaCursos = () => {
         if (!form.docente_id)    { setMsgForm('err:Debes asignar un docente.'); return; }
         setGuardando(true);
         try {
-            await axios.post('/api/cursos/admin/cursos/', form, authHeaders());
+            await axios.post('/api/admin/cursos/', form, authHeaders());
             setMsgForm('ok:¡Curso creado exitosamente!');
             setForm({ nombre: '', descripcion: '', tecnologia: 'python', color: '#3776AB', docente_id: '' });
             cargar();
@@ -243,7 +243,7 @@ const VistaCursos = () => {
     const eliminarCurso = async (id, nombre) => {
         if (!window.confirm(`¿Eliminar el curso "${nombre}"? Esta acción no se puede deshacer.`)) return;
         try {
-        await axios.post('/api/cursos/admin/cursos/', form, authHeaders());            
+        await axios.delete('/api/admin/cursos/${id}/', form, authHeaders());            
         setCursos(prev => prev.filter(c => c.id !== id));
         } catch { alert('Error al eliminar el curso.'); }
     };

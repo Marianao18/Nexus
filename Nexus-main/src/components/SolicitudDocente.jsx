@@ -24,7 +24,7 @@ const SolicitudDocente = () => {
         setRespuestaServidor({ texto: '', esError: false });
 
         try {
-            const res = await axios.post('/api/solicitudes/solicitud-docente/', {
+            const res = await axios.post('/api/solicitud-docente/', {
                 nombre_completo: nombre,
                 email: email,
                 especialidad: especialidad,

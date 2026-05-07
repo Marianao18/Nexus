@@ -12,7 +12,7 @@ const AdminSolicitudes = () => {
     useEffect(() => {
         const cargarDatos = async () => {
             try {
-                const res = await axios.get('http://localhost:8000/api/solicitudes/admin/solicitudes/', {
+                const res = await axios.get('/api/admin/solicitudes/', {
                     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
                 });
                 setSolicitudes(res.data);
@@ -30,7 +30,7 @@ const AdminSolicitudes = () => {
         if (window.confirm("¿Deseas convertir a este postulante en docente oficial?")) {
             try {
                 const res = await axios.post(
-                    `http://localhost:8000/api/solicitudes/admin/aprobar-docente/${id}/`,
+                    `/api/admin/aprobar-docente/${id}/`,
                     {},
                     {
                         headers: {
@@ -63,7 +63,7 @@ const AdminSolicitudes = () => {
         if (window.confirm("¿Estás seguro de rechazar esta solicitud? Se enviará un correo de notificación.")) {
             try {
                 // Asumiendo que creamos la ruta /api/admin/rechazar-docente en el index.js
-                const res = await axios.post(`http://localhost:8000/api/solicitudes/admin/rechazar-docente/${id}/`, {}, {
+                const res = await axios.post(`/api/admin/rechazar-docente/${id}/`, {}, {
                     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
                 });
                 alert(res.data.mensaje);

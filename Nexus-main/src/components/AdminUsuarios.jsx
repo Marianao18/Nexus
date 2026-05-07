@@ -12,7 +12,7 @@ const AdminUsuarios = () => {
     const [tab,     setTab]     = useState('estudiantes');
 
     useEffect(() => {
-        axios.get('http://localhost:8000/api/usuarios/admin/usuarios/', authHeaders())
+        axios.get('/api/admin/usuarios/', authHeaders())
             .then(res => {
                 console.log("Datos recibidos:", res.data); 
                 setData(res.data);

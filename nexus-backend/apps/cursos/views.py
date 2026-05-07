@@ -13,19 +13,29 @@ class ResumenEstudianteView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
+        from .models import LeccionVista
+        from django.utils.timesince import timesince
+
         estudiante = request.user
         inscripciones = Inscripcion.objects.filter(estudiante=estudiante, activa=True)
         cursos_activos = inscripciones.count()
 
         if cursos_activos > 0:
-            total_progreso = sum(i.progreso for i in inscripciones)
-            progreso_global = round(total_progreso / cursos_activos)
+            progreso_total = 0
+            for insc in inscripciones:
+                total_lecciones = sum(m.lecciones.count() for m in insc.curso.modulos.all())
+                vistas = LeccionVista.objects.filter(
+                    estudiante=estudiante,
+                    leccion__modulo__curso=insc.curso
+                ).count()
+                progreso_total += round((vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
+            progreso_global = round(progreso_total / cursos_activos)
         else:
             progreso_global = 0
 
         rutas_activas = InscripcionRuta.objects.filter(estudiante=estudiante, activa=True).count()
-        modulos_hechos = ModuloCompletado.objects.filter(estudiante=estudiante).count()
-        xp_total = modulos_hechos * 100
+        lecciones_vistas = LeccionVista.objects.filter(estudiante=estudiante).count()
+        xp_total = lecciones_vistas * 50
 
         if xp_total >= 2000:   nivel = 5
         elif xp_total >= 1500: nivel = 4
@@ -33,16 +43,15 @@ class ResumenEstudianteView(APIView):
         elif xp_total >= 500:  nivel = 2
         else:                  nivel = 1
 
-        from django.utils.timesince import timesince
-        recientes = ModuloCompletado.objects.filter(
+        recientes = LeccionVista.objects.filter(
             estudiante=estudiante
-        ).select_related('modulo__curso').order_by('-fecha')[:5]
+        ).select_related('leccion__modulo__curso').order_by('-fecha')[:5]
 
         actividad = [{
-            'texto': f'Completaste el módulo "{m.modulo.nombre}" en {m.modulo.curso.nombre}',
-            'tiempo': f'Hace {timesince(m.fecha)}',
-            'color': m.modulo.curso.color,
-        } for m in recientes]
+            'texto': f'Completaste la lección "{lv.leccion.titulo}" en {lv.leccion.modulo.curso.nombre}',
+            'tiempo': f'Hace {timesince(lv.fecha)}',
+            'color': lv.leccion.modulo.curso.color,
+        } for lv in recientes]
 
         return Response({
             'cursos_activos':  cursos_activos,
@@ -93,18 +102,28 @@ class ProgresoEstudianteView(APIView):
             estudiante=estudiante, activa=True
         ).select_related('curso')
 
-        detalle_cursos = [{
-            'curso':       insc.curso.nombre,
-            'color':       insc.curso.color,
-            'progreso':    insc.progreso,
-            'completados': insc.modulos_completados,
-            'total':       insc.curso.modulos.count(),
-        } for insc in inscripciones]
+        from .models import LeccionVista
+        detalle_cursos = []
+        for insc in inscripciones:
+            total_lecciones = sum(m.lecciones.count() for m in insc.curso.modulos.all())
+            vistas = LeccionVista.objects.filter(
+                estudiante=estudiante,
+                leccion__modulo__curso=insc.curso
+            ).count()
+            progreso = round((vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
+            detalle_cursos.append({
+                'curso':       insc.curso.nombre,
+                'color':       insc.curso.color,
+                'progreso':    progreso,
+                'completados': vistas,
+                'total':       total_lecciones,
+            })
 
-        modulos_totales = ModuloCompletado.objects.filter(estudiante=estudiante).count()
+        from .models import LeccionVista
+        lecciones_totales = LeccionVista.objects.filter(estudiante=estudiante).count()
 
         return Response({
-            'modulos_completados_total': modulos_totales,
+            'modulos_completados_total': lecciones_totales,
             'detalle_cursos': detalle_cursos,
         })
 
@@ -364,14 +383,24 @@ class DocenteEstudiantesView(APIView):
             curso=curso, activa=True
         ).select_related('estudiante')
 
-        data = [{
-            'id':       str(i.estudiante.id),
-            'nombre':   i.estudiante.nombre,
-            'email':    i.estudiante.email,
-            'progreso': i.progreso,
-            'modulos_completados': i.modulos_completados,
-            'modulos_total':       curso.modulos.count(),
-        } for i in inscripciones]
+        from .models import LeccionVista
+        total_lecciones = sum(m.lecciones.count() for m in curso.modulos.all())
+
+        data = []
+        for i in inscripciones:
+            lecciones_vistas = LeccionVista.objects.filter(
+                estudiante=i.estudiante,
+                leccion__modulo__curso=curso
+            ).count()
+            progreso = round((lecciones_vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
+            data.append({
+                'id':                 str(i.estudiante.id),
+                'nombre':             i.estudiante.nombre,
+                'email':              i.estudiante.email,
+                'progreso':           progreso,
+                'lecciones_vistas':   lecciones_vistas,
+                'lecciones_total':    total_lecciones,
+            })
 
         return Response({
             'curso':       curso.nombre,
@@ -403,7 +432,14 @@ class DocenteResumenView(APIView):
             modulo__curso__docente=request.user
         ).count()
 
-        tasa = round((total_completados / (total_modulos * max(total_estudiantes, 1))) * 100) if total_modulos > 0 else 0
+        from .models import LeccionVista
+        total_lecciones_vistas = LeccionVista.objects.filter(
+            leccion__modulo__curso__docente=request.user
+        ).count()
+        total_lecciones = sum(
+            sum(m.lecciones.count() for m in c.modulos.all()) for c in cursos
+        )
+        tasa = round((total_lecciones_vistas / (total_lecciones * max(total_estudiantes, 1))) * 100) if total_lecciones > 0 else 0
 
         return Response({
             'cursos_activos':    cursos_count,
@@ -494,3 +530,225 @@ class RecursoDeleteView(APIView):
         recurso.archivo.delete(save=False)
         recurso.delete()
         return Response({'mensaje': 'Recurso eliminado correctamente.'})
+
+
+# ── VISTAS CONTENIDO ──────────────────────────────────────────────────────────
+
+def youtube_embed(url):
+    """Convierte cualquier URL de YouTube a formato embed."""
+    import re
+    if not url:
+        return ''
+    patterns = [
+        r'(?:youtube\.com/watch\?v=|youtu\.be/|youtube\.com/embed/)([a-zA-Z0-9_-]{11})',
+    ]
+    for p in patterns:
+        m = re.search(p, url)
+        if m:
+            return f"https://www.youtube.com/embed/{m.group(1)}"
+    return url
+
+
+class AdminContenidoCursoView(APIView):
+    """
+    GET  /api/admin/cursos/<id>/contenido/  → módulos y lecciones del curso
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        if request.user.rol != 'admin':
+            return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            curso = Curso.objects.get(id=id)
+        except Curso.DoesNotExist:
+            return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        from .models import Leccion
+        modulos = curso.modulos.all()
+        data = {
+            'curso_nombre': curso.nombre,
+            'curso_color':  curso.color,
+            'modulos': [{
+                'id':    str(m.id),
+                'nombre': m.nombre,
+                'orden':  m.orden,
+                'lecciones': [{
+                    'id':          str(l.id),
+                    'titulo':      l.titulo,
+                    'descripcion': l.descripcion,
+                    'video_url':   youtube_embed(l.video_url),
+                    'orden':       l.orden,
+                } for l in m.lecciones.all()]
+            } for m in modulos]
+        }
+        return Response(data)
+
+
+class AdminModuloView(APIView):
+    """
+    POST   /api/admin/cursos/<id>/modulos/        → crear módulo
+    DELETE /api/admin/modulos/<modulo_id>/        → eliminar módulo
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, id):
+        if request.user.rol != 'admin':
+            return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            curso = Curso.objects.get(id=id)
+        except Curso.DoesNotExist:
+            return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        nombre = request.data.get('nombre', '').strip()
+        if not nombre:
+            return Response({'error': 'El nombre es obligatorio.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        orden = curso.modulos.count() + 1
+        modulo = Modulo.objects.create(curso=curso, nombre=nombre, orden=orden)
+        return Response({'id': str(modulo.id), 'nombre': modulo.nombre, 'orden': modulo.orden, 'lecciones': []}, status=status.HTTP_201_CREATED)
+
+
+class AdminModuloDetalleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, modulo_id):
+        if request.user.rol != 'admin':
+            return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            modulo = Modulo.objects.get(id=modulo_id)
+        except Modulo.DoesNotExist:
+            return Response({'error': 'Módulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        modulo.delete()
+        return Response({'mensaje': 'Módulo eliminado.'})
+
+
+class AdminLeccionView(APIView):
+    """
+    POST /api/admin/modulos/<modulo_id>/lecciones/  → crear lección con video
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, modulo_id):
+        if request.user.rol != 'admin':
+            return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+        try:
+            modulo = Modulo.objects.get(id=modulo_id)
+        except Modulo.DoesNotExist:
+            return Response({'error': 'Módulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+
+        from .models import Leccion
+        titulo    = request.data.get('titulo', '').strip()
+        video_url = request.data.get('video_url', '').strip()
+        descripcion = request.data.get('descripcion', '').strip()
+
+        if not titulo:
+            return Response({'error': 'El título es obligatorio.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        orden = modulo.lecciones.count() + 1
+        leccion = Leccion.objects.create(
+            modulo=modulo, titulo=titulo,
+            video_url=video_url, descripcion=descripcion, orden=orden
+        )
+        return Response({
+            'id':          str(leccion.id),
+            'titulo':      leccion.titulo,
+            'descripcion': leccion.descripcion,
+            'video_url':   youtube_embed(leccion.video_url),
+            'orden':       leccion.orden,
+        }, status=status.HTTP_201_CREATED)
+
+
+class AdminLeccionDetalleView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, leccion_id):
+        if request.user.rol != 'admin':
+            return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+        from .models import Leccion
+        try:
+            leccion = Leccion.objects.get(id=leccion_id)
+        except Leccion.DoesNotExist:
+            return Response({'error': 'Lección no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+        leccion.delete()
+        return Response({'mensaje': 'Lección eliminada.'})
+
+
+class EstudianteCursoContenidoView(APIView):
+    """
+    GET /api/estudiante/cursos/<id>/contenido/
+    Contenido del curso para el estudiante — módulos, lecciones y cuáles ha visto.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, id):
+        try:
+            curso = Curso.objects.get(id=id)
+            Inscripcion.objects.get(estudiante=request.user, curso=curso, activa=True)
+        except Curso.DoesNotExist:
+            return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+        except Inscripcion.DoesNotExist:
+            return Response({'error': 'No estás inscrito en este curso.'}, status=status.HTTP_403_FORBIDDEN)
+
+        from .models import Leccion, LeccionVista
+        lecciones_vistas = set(
+            LeccionVista.objects.filter(estudiante=request.user).values_list('leccion_id', flat=True)
+        )
+
+        modulos = curso.modulos.all()
+        total_lecciones = 0
+        total_vistas    = 0
+
+        modulos_data = []
+        for m in modulos:
+            lecciones = m.lecciones.all()
+            lecs_data = []
+            for l in lecciones:
+                vista = l.id in lecciones_vistas
+                total_lecciones += 1
+                if vista: total_vistas += 1
+                lecs_data.append({
+                    'id':          str(l.id),
+                    'titulo':      l.titulo,
+                    'descripcion': l.descripcion,
+                    'video_url':   youtube_embed(l.video_url),
+                    'orden':       l.orden,
+                    'vista':       vista,
+                })
+            modulos_data.append({
+                'id':       str(m.id),
+                'nombre':   m.nombre,
+                'orden':    m.orden,
+                'lecciones': lecs_data,
+            })
+
+        progreso = round((total_vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
+
+        return Response({
+            'curso_nombre': curso.nombre,
+            'curso_color':  curso.color,
+            'progreso':     progreso,
+            'modulos':      modulos_data,
+        })
+
+
+class MarcarLeccionVistaView(APIView):
+    """
+    POST /api/estudiante/lecciones/<id>/vista/
+    Marca una lección como vista por el estudiante.
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, leccion_id):
+        from .models import Leccion, LeccionVista
+        try:
+            leccion = Leccion.objects.get(id=leccion_id)
+        except Leccion.DoesNotExist:
+            return Response({'error': 'Lección no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+
+        lv, creada = LeccionVista.objects.get_or_create(
+            estudiante=request.user, leccion=leccion
+        )
+        return Response({
+            'mensaje': 'Lección marcada como vista.' if creada else 'Ya estaba marcada.',
+            'xp_ganado': 50 if creada else 0,
+        })

@@ -149,38 +149,33 @@ class Recurso(models.Model):
     def __str__(self):
         return f"{self.nombre} — {self.curso.nombre}"
 
-class Modulo(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
 
-    curso = models.ForeignKey(
-        Curso,
-        on_delete=models.CASCADE,
-        related_name='modulos'
-    )
-
-    titulo = models.CharField(max_length=255)
-
-    orden = models.PositiveIntegerField(default=1)
-
-    def __str__(self):
-        return self.titulo
-    
 class Leccion(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
-    modulo = models.ForeignKey(
-        Modulo,
-        on_delete=models.CASCADE,
-        related_name='lecciones'
-    )
-
-    titulo = models.CharField(max_length=255)
-
+    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    modulo      = models.ForeignKey(Modulo, on_delete=models.CASCADE, related_name='lecciones')
+    titulo      = models.CharField(max_length=200)
     descripcion = models.TextField(blank=True)
+    video_url   = models.URLField(blank=True)
+    orden       = models.PositiveIntegerField(default=1)
+    fecha_creacion = models.DateTimeField(auto_now_add=True)
 
-    video_url = models.URLField()
-
-    orden = models.PositiveIntegerField(default=1)
+    class Meta:
+        db_table = 'lecciones'
+        ordering = ['orden']
 
     def __str__(self):
-        return self.titulo
+        return f"{self.modulo.nombre} — {self.titulo}"
+
+
+class LeccionVista(models.Model):
+    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    estudiante  = models.ForeignKey(Usuario, on_delete=models.CASCADE, related_name='lecciones_vistas')
+    leccion     = models.ForeignKey(Leccion, on_delete=models.CASCADE)
+    fecha       = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table        = 'lecciones_vistas'
+        unique_together = ['estudiante', 'leccion']
+
+    def __str__(self):
+        return f"{self.estudiante.nombre} ✓ {self.leccion.titulo}"
