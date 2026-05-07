@@ -34,9 +34,14 @@ const AdminDashboard = () => {
 
     // 2. LOGICA DE CIERRE DE SESIÓN
     const cerrarSesion = () => {
-        localStorage.clear();
-        navigate('/login');
-    };
+
+    localStorage.clear();
+
+    // Fuerza actualización del estado auth
+    window.dispatchEvent(new Event('authChange'));
+
+    window.location.replace('/login');
+};
 
     // 3. FUNCIÓN DE APROBACIÓN (Pre-configurada)
     const manejarAprobacion = async (id) => {
@@ -115,5 +120,7 @@ const AdminDashboard = () => {
         </div>
     );
 };
+
+
 
 export default AdminDashboard;

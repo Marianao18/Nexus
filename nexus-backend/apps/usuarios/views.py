@@ -244,3 +244,22 @@ class EliminarUsuarioView(APIView):
                 {'error': 'Usuario no encontrado'},
                 status=status.HTTP_404_NOT_FOUND
             )
+
+class CrearCursoView(APIView):
+
+    def post(self, request):
+
+        data = request.data
+
+        curso = Curso.objects.create(
+            nombre=data.get('nombre'),
+            descripcion=data.get('descripcion'),
+            tecnologia=data.get('tecnologia'),
+            color=data.get('color'),
+            docente_id=data.get('docente_id'),
+        )
+
+        return Response({
+            "mensaje": "Curso creado correctamente",
+            "id": str(curso.id)
+        }, status=status.HTTP_201_CREATED)

@@ -19,6 +19,7 @@ import HomeDocente from './components/HomeDocente.jsx';
 import HomeEstudiante from './components/HomeEstudiante.jsx';
 import CambiarPassword from './components/CambiarPassword.jsx';
 import RutasPage from './components/RutasPage.jsx';
+import AdminContenidoCurso from './components/AdminContenidoCurso';
 const ProtectedRoute = ({ userRole, allowedRoles, children }) => {
     if (!userRole) {
         return <Navigate to="/login" replace />;
@@ -103,14 +104,31 @@ export default function App() {
                         <Route path="/ser-docente" element={<SolicitudDocente />} />
                         <Route path="/rutas" element={<RutasPage />} />
 
-                        <Route path="/login" element={
-                            (userRole && userRole.toLowerCase() === 'admin') 
-                            ? <Navigate to="/admin-dashboard" replace /> 
-                            : <Login />
-                        } />
+                        <Route 
+                            path="/login" 
+                            element={
+                                userRole ? (
+                                    userRole.toLowerCase() === 'admin' ? (
+                                        <Navigate to="/admin-dashboard" replace />
+                                        ) : userRole.toLowerCase() === 'docente' ? (
+                                        <Navigate to="/docente-dashboard" replace />
+                                        ) : userRole.toLowerCase() === 'estudiante' ? (
+                                        <Navigate to="/estudiante-dashboard" replace />
+                                        ) : (
+                                        <Login />
+                                        )
+                                    ) : (
+                                        <Login />
+                                    )
+                                } 
+/>
 
                         <Route path="/admin-dashboard" element={
-                            <ProtectedRoute userRole={userRole} allowedRoles={['admin']}><HomeAdm /></ProtectedRoute>
+                            <ProtectedRoute userRole={userRole} allowedRoles={['admin']}><HomeAdm setUserRole={setUserRole} /></ProtectedRoute>
+                        } />
+
+                        <Route path="/curso/:id/contenido"element={
+                            <ProtectedRoute userRole={userRole} allowedRoles={['admin']}><AdminContenidoCurso /></ProtectedRoute>
                         } />
 
                         <Route path="/AdminSolicitudes" element={
@@ -124,13 +142,13 @@ export default function App() {
                         {localStorage.getItem('debe_cambiar') === 'true' ? (
                         <Navigate to="/cambiar-password-obligatorio" replace />
                     ) : (
-            <HomeDocente />
+            <HomeDocente setUserRole={setUserRole} />
         )}
     </ProtectedRoute>
 } />
 
                         <Route path="/estudiante-dashboard" element={
-                            <ProtectedRoute userRole={userRole} allowedRoles={['estudiante']}><HomeEstudiante /></ProtectedRoute>
+                            <ProtectedRoute userRole={userRole} allowedRoles={['estudiante']}><HomeEstudiante setUserRole={setUserRole} /></ProtectedRoute>
                         } />
                         <Route path="/cambiar-password-obligatorio" element={<CambiarPassword />} />
 

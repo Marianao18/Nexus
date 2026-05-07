@@ -59,7 +59,7 @@ const TECNOLOGIAS = [
 ];
 
 // ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────────
-const AdminHome = () => {
+const AdminHome = ({ setUserRole }) => {
     const [vista, setVista]           = useState('resumen');
     const [usuarios, setUsuarios]     = useState([]);
     const [solicitudes, setSolicitudes] = useState([]);
@@ -99,11 +99,10 @@ const AdminHome = () => {
     }, [vista]);
 
     const cerrarSesion = () => {
-        if (window.confirm('¿Deseas salir de NEXUS?')) {
-            localStorage.clear();
-            navigate('/login');
-        }
-    };
+    localStorage.clear();
+    setUserRole(null);
+    window.location.href = '/login';
+};
 
     return (
         <div className="na-layout">
@@ -170,6 +169,7 @@ const VistaResumen = () => (
 
 // ── VISTA: CURSOS ─────────────────────────────────────────────────────────────
 const VistaCursos = () => {
+    const navigate = useNavigate();
     const [cursos,   setCursos]   = useState([]);
     const [docentes, setDocentes] = useState([]);
     const [loading,  setLoading]  = useState(true);
@@ -210,7 +210,7 @@ const VistaCursos = () => {
         if (!form.docente_id)    { setMsgForm('err:Debes asignar un docente.'); return; }
         setGuardando(true);
         try {
-            await axios.post('/api/admin/cursos/', form, authHeaders());
+            await axios.post('/api/cursos/admin/cursos/', form, authHeaders());
             setMsgForm('ok:¡Curso creado exitosamente!');
             setForm({ nombre: '', descripcion: '', tecnologia: 'python', color: '#3776AB', docente_id: '' });
             cargar();
@@ -221,17 +221,30 @@ const VistaCursos = () => {
     };
 
     const toggleActivo = async (id) => {
-        try {
-            const res = await axios.patch(`/api/admin/cursos/${id}/`, {}, authHeaders());
-            setCursos(prev => prev.map(c => c.id === id ? { ...c, activo: res.data.activo } : c));
-        } catch { alert('Error al actualizar el curso.'); }
-    };
+    try {
+
+        const res = await axios.patch(
+            `/api/cursos/admin/cursos/${id}/`,
+            {},
+            authHeaders()
+        );
+
+        setCursos(prev =>
+            prev.map(c =>
+                c.id === id
+                    ? { ...c, activo: res.data.activo }: c)
+        );
+
+    } catch {
+        alert('Error al actualizar el curso.');
+    }
+};
 
     const eliminarCurso = async (id, nombre) => {
         if (!window.confirm(`¿Eliminar el curso "${nombre}"? Esta acción no se puede deshacer.`)) return;
         try {
-            await axios.delete(`/api/admin/cursos/${id}/`, authHeaders());
-            setCursos(prev => prev.filter(c => c.id !== id));
+        await axios.post('/api/cursos/admin/cursos/', form, authHeaders());            
+        setCursos(prev => prev.filter(c => c.id !== id));
         } catch { alert('Error al eliminar el curso.'); }
     };
 
@@ -248,7 +261,7 @@ const VistaCursos = () => {
                     <p style={{ fontSize:'13px', color:'var(--na-muted)', marginTop:'4px' }}>
                         {cursos.length} cursos en NEXUS
                     </p>
-                </div>
+                </div> 
                 <button
                     onClick={() => { setMostrarForm(!mostrarForm); setMsgForm(''); }}
                     style={{
@@ -322,7 +335,6 @@ const VistaCursos = () => {
                                     ))}
                                 </select>
                             </div>
-
                         </div>
 
                         {/* Previsualización color */}
@@ -419,6 +431,21 @@ const VistaCursos = () => {
                                 >
                                     Eliminar
                                 </button>
+                                <button
+                                    onClick={() => navigate(`/curso/${curso.id}/contenido`)}
+                                    style={{
+                                    background:'rgba(0,229,255,0.08)',
+                                    border:'1px solid rgba(0,229,255,0.25)',
+                                    borderRadius:'6px',
+                                    padding:'6px 12px',
+                                    color:'#00E5FF',
+                                    fontSize:'12px',
+                                    cursor:'pointer',
+                                    fontFamily:'inherit',
+                                    }}
+                                >
+                                    Gestionar contenido
+                                </button>
                             </div>
                         </div>
                     ))}
@@ -436,10 +463,51 @@ const labelStyle = {
 };
 
 const inputStyle = {
-    width:'100%', background:'rgba(255,255,255,0.04)',
-    border:'1px solid rgba(255,255,255,0.12)', borderRadius:'8px',
-    padding:'9px 12px', color:'var(--na-text)', fontSize:'13px',
-    fontFamily:'inherit', outline:'none', boxSizing:'border-box',
+    width:'100%',
+    background:'rgba(15, 23, 42, 0.95)',
+    border:'1px solid rgba(0,229,255,0.18)',
+    borderRadius:'10px',
+    padding:'10px 14px',
+    color:'#E6F1FF',
+    fontSize:'13px',
+    fontFamily:'inherit',
+    outline:'none',
+    boxSizing:'border-box',
+    transition:'all 0.3s ease',
+    appearance:'none',
+    WebkitAppearance:'none',
+    MozAppearance:'none',
+    boxShadow:'0 0 0 transparent',
+};
+
+const moduloStyle = {
+    background:'rgba(255,255,255,0.04)',
+    border:'1px solid rgba(255,255,255,0.06)',
+    padding:'14px',
+    borderRadius:'12px',
+    cursor:'pointer',
+    transition:'0.3s',
+};
+
+const cardStyle = {
+    background:'rgba(255,255,255,0.03)',
+    border:'1px solid rgba(255,255,255,0.08)',
+    borderRadius:'14px',
+    padding:'18px',
+    marginBottom:'16px',
+    display:'flex',
+    justifyContent:'space-between',
+    alignItems:'center'
+};
+
+const btnStyle = {
+    background:'#00E5FF22',
+    color:'#00E5FF',
+    border:'1px solid rgba(0,229,255,0.25)',
+    borderRadius:'8px',
+    padding:'8px 16px',
+    cursor:'pointer',
+    fontWeight:'bold'
 };
 
 export default AdminHome;

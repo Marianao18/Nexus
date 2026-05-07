@@ -120,6 +120,48 @@
   text-align: left;
   width: 100%;
 }
+/* SELECTS NEXUS */
+
+select{
+    background: #0f172a !important;
+    color: #E6F1FF !important;
+    border: 1px solid rgba(0,229,255,0.18) !important;
+}
+
+/* OPCIONES */
+
+select option{
+    background: #111827;
+    color: #E6F1FF;
+    padding: 12px;
+}
+
+/* HOVER OPCIONES */
+
+select option:hover{
+    background: #00E5FF;
+    color: #000;
+}
+
+/* FOCUS */
+
+select:focus{
+    border-color: #00E5FF !important;
+    box-shadow: 0 0 12px rgba(0,229,255,0.25);
+}
+
+select{
+    background-image:
+        linear-gradient(45deg, transparent 50%, #00E5FF 50%),
+        linear-gradient(135deg, #00E5FF 50%, transparent 50%);
+
+    background-position:
+        calc(100% - 18px) calc(50% - 3px),
+        calc(100% - 12px) calc(50% - 3px);
+
+    background-size: 6px 6px, 6px 6px;
+    background-repeat: no-repeat;
+}
 .nd-nav-item:hover { background: var(--border2); color: var(--text); }
 .nd-nav-active {
   background: rgba(0,229,255,.1) !important;
