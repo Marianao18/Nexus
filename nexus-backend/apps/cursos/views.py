@@ -2,10 +2,10 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
-from .models import Curso, Inscripcion, InscripcionRuta, RutaAprendizaje, ModuloCompletado
+from .models import Curso, Inscripcion, InscripcionRuta, RutaAprendizaje, ModuloCompletado, Modulo, Recurso
 from .serializers import CursoInscripcionSerializer, RutaSerializer
 from apps.usuarios.models import Usuario
-
+import anthropic
 
 # ── VISTAS EXISTENTES ─────────────────────────────────────────────────────────
 
@@ -752,3 +752,340 @@ class MarcarLeccionVistaView(APIView):
             'mensaje': 'Lección marcada como vista.' if creada else 'Ya estaba marcada.',
             'xp_ganado': 50 if creada else 0,
         })
+
+
+# ── SEGURIDAD DE VIDEO ────────────────────────────────────────────────────────
+
+class TokenVideoView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, leccion_id):
+        from .models import Leccion
+
+        # 1. Verificar que la lección existe
+        try:
+            leccion = Leccion.objects.select_related(
+                'modulo__curso'
+            ).get(id=leccion_id)
+        except Leccion.DoesNotExist:
+            return Response(
+                {'error': 'Contenido no encontrado.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        curso = leccion.modulo.curso
+
+        # 2. Verificar que el estudiante está inscrito y activo
+        if request.user.rol != 'estudiante':
+            return Response(
+                {'error': 'Solo los estudiantes pueden acceder al contenido.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        inscrito = Inscripcion.objects.filter(
+            estudiante=request.user,
+            curso=curso,
+            activa=True
+        ).exists()
+
+        if not inscrito:
+            return Response(
+                {'error': 'No estás inscrito en este curso.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 3. Verificar que el curso está activo
+        if not curso.activo:
+            return Response(
+                {'error': 'Este curso no está disponible.'},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
+        # 4. Entregar el embed URL de forma segura
+        embed_url = youtube_embed(leccion.video_url)
+        if not embed_url:
+            return Response(
+                {'error': 'Esta lección no tiene video disponible.'},
+                status=status.HTTP_404_NOT_FOUND
+            )
+
+        # Agregar parámetros de seguridad al embed de YouTube
+        embed_url_seguro = (
+                f"{embed_url}"
+                f"?rel=0"
+                f"&modestbranding=1"
+                f"&iv_load_policy=3"
+                f"&showinfo=0"
+                f"&disablekb=0"
+                f"&controls=1"
+                f"&playsinline=1"
+                f"&origin=http://localhost:3000"
+        )
+
+        return Response({
+            'leccion_id':  str(leccion.id),
+            'titulo':      leccion.titulo,
+            'embed_url':   embed_url_seguro,
+            'curso':       curso.nombre,
+            'autorizado':  True,
+        })
+
+
+# ── NEXIA — Asistente IA ──────────────────────────────────────────────────────
+
+class NexIAChatView(APIView):
+    """
+    POST /api/nexia/chat/
+    Recibe el mensaje del estudiante, construye contexto real desde la DB
+    y consulta Claude (Anthropic) para generar una respuesta personalizada.
+
+    Body: {
+        "mensaje": "¿Cuánto llevo en Python?",
+        "historial": [                       # opcional, últimos N turnos
+            {"rol": "user",      "texto": "Hola"},
+            {"rol": "assistant", "texto": "¡Hola! Soy NexIA..."}
+        ]
+    }
+    """
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        from django.conf import settings
+        import anthropic
+        from .models import LeccionVista, Recurso
+
+        # ── 1. Validar entrada ────────────────────────────────────────────────
+        mensaje = request.data.get('mensaje', '').strip()
+        historial = request.data.get('historial', [])
+
+        if not mensaje:
+            return Response(
+                {'error': 'El campo "mensaje" es requerido.'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        if len(mensaje) > 1000:
+            return Response(
+                {'error': 'El mensaje es demasiado largo (máximo 1000 caracteres).'},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        estudiante = request.user
+
+        # Solo estudiantes usan NexIA (docentes y admin no tienen cursos inscritos)
+        if estudiante.rol not in ('estudiante', 'docente', 'admin'):
+            return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
+
+        # ── 2. Construir contexto real desde la DB ────────────────────────────
+        contexto_usuario = _construir_contexto(estudiante)
+
+        # ── 3. Armar el system prompt personalizado ───────────────────────────
+        system_prompt = _system_prompt(estudiante, contexto_usuario)
+
+        # ── 4. Convertir historial del frontend al formato Anthropic ─────────
+        messages = []
+        for turno in historial[-10:]:   # máximo últimos 10 turnos
+            rol_api = 'user' if turno.get('rol') == 'user' else 'assistant'
+            texto   = str(turno.get('texto', '')).strip()
+            if texto:
+                messages.append({'role': rol_api, 'content': texto})
+
+        # Agregar el mensaje actual
+        messages.append({'role': 'user', 'content': mensaje})
+
+        # Anthropic exige alternancia estricta user/assistant
+        messages = _limpiar_historial(messages)
+
+        # ── 5. Llamar a Claude ────────────────────────────────────────────────
+        api_key = settings.ANTHROPIC_API_KEY
+        if not api_key or api_key.startswith('sk-ant-aqui'):
+            return Response(
+                {'error': 'NexIA no está configurada aún. Contacta al administrador.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+
+        try:
+            client = anthropic.Anthropic(api_key=api_key)
+            respuesta = client.messages.create(
+                model='claude-haiku-4-5-20251001',   # rápido y económico para chat
+                max_tokens=600,
+                system=system_prompt,
+                messages=messages,
+            )
+            texto_respuesta = respuesta.content[0].text
+
+        except anthropic.APIConnectionError:
+            return Response(
+                {'error': 'No se pudo conectar con NexIA. Intenta de nuevo.'},
+                status=status.HTTP_503_SERVICE_UNAVAILABLE
+            )
+        except anthropic.RateLimitError:
+            return Response(
+                {'error': 'NexIA está recibiendo muchas consultas. Intenta en unos segundos.'},
+                status=status.HTTP_429_TOO_MANY_REQUESTS
+            )
+        except anthropic.APIError as e:
+            return Response(
+                {'error': f'Error en NexIA: {str(e)}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+        return Response({'respuesta': texto_respuesta})
+
+
+# ── Helpers privados ──────────────────────────────────────────────────────────
+
+def _construir_contexto(estudiante):
+    """Consulta la DB y devuelve un dict con toda la info del estudiante."""
+    from .models import (
+        Inscripcion, LeccionVista, InscripcionRuta, RutaAprendizaje, Curso
+    )
+
+    # Cursos inscritos con progreso real
+    inscripciones = Inscripcion.objects.filter(
+        estudiante=estudiante, activa=True
+    ).select_related('curso__docente')
+
+    cursos_info = []
+    for insc in inscripciones:
+        curso = insc.curso
+        total_lecciones = sum(m.lecciones.count() for m in curso.modulos.all())
+        vistas = LeccionVista.objects.filter(
+            estudiante=estudiante,
+            leccion__modulo__curso=curso
+        ).count()
+        progreso = round((vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
+
+        # Próxima lección no vista
+        proxima = None
+        for modulo in curso.modulos.all():
+            for leccion in modulo.lecciones.all():
+                if not LeccionVista.objects.filter(
+                    estudiante=estudiante, leccion=leccion
+                ).exists():
+                    proxima = f'"{leccion.titulo}" (módulo: {modulo.nombre})'
+                    break
+            if proxima:
+                break
+
+        cursos_info.append({
+            'nombre':      curso.nombre,
+            'tecnologia':  curso.tecnologia,
+            'docente':     curso.docente.nombre if curso.docente else 'NEXUS',
+            'progreso':    progreso,
+            'vistas':      vistas,
+            'total':       total_lecciones,
+            'proxima':     proxima or 'curso completado ✓',
+        })
+
+    # Rutas inscritas
+    rutas = list(
+        InscripcionRuta.objects.filter(
+            estudiante=estudiante, activa=True
+        ).select_related('ruta').values_list('ruta__nombre', flat=True)
+    )
+
+    # XP y nivel
+    total_vistas = LeccionVista.objects.filter(estudiante=estudiante).count()
+    xp = total_vistas * 50
+    if xp >= 2000:   nivel = 5
+    elif xp >= 1500: nivel = 4
+    elif xp >= 1000: nivel = 3
+    elif xp >= 500:  nivel = 2
+    else:            nivel = 1
+
+    # Catálogo de cursos disponibles (para recomendar inscripción)
+    catalogo = list(
+        Curso.objects.filter(activo=True).values_list('nombre', 'tecnologia')
+    )
+    catalogo_str = ', '.join(f'{n} ({t})' for n, t in catalogo[:10])
+
+    return {
+        'nombre':   estudiante.nombre,
+        'cursos':   cursos_info,
+        'rutas':    rutas,
+        'xp':       xp,
+        'nivel':    nivel,
+        'catalogo': catalogo_str,
+    }
+
+
+def _system_prompt(estudiante, ctx):
+    """Construye el system prompt con contexto real del estudiante."""
+
+    cursos_texto = ''
+    for c in ctx['cursos']:
+        cursos_texto += (
+            f"  • {c['nombre']} ({c['tecnologia']}) — "
+            f"{c['progreso']}% completado ({c['vistas']}/{c['total']} lecciones). "
+            f"Docente: {c['docente']}. "
+            f"Próxima lección pendiente: {c['proxima']}\n"
+        )
+    if not cursos_texto:
+        cursos_texto = '  (El estudiante no tiene cursos inscritos aún)\n'
+
+    rutas_texto = ', '.join(ctx['rutas']) if ctx['rutas'] else 'ninguna ruta inscrita aún'
+
+    return f"""Eres NexIA, el asistente de aprendizaje de la plataforma educativa NEXUS.
+NEXUS es una plataforma de formación tecnológica para estudiantes de Medellín, Colombia,
+enfocada en impulsar conocimientos de tecnología de la información (TI).
+
+Estás hablando con: {ctx['nombre']}
+Rol: estudiante de la plataforma NEXUS.
+
+=== INFORMACIÓN REAL DEL ESTUDIANTE ===
+
+Cursos inscritos y progreso:
+{cursos_texto}
+Rutas de aprendizaje inscritas: {rutas_texto}
+
+XP acumulado: {ctx['xp']} puntos | Nivel actual: {ctx['nivel']}/5
+
+Catálogo de cursos disponibles en NEXUS:
+  {ctx['catalogo']}
+
+=== TU PERSONALIDAD Y COMPORTAMIENTO ===
+
+1. Eres cercano, motivador y claro. Hablas en español colombiano informal pero respetuoso.
+   Usas "tú" para dirigirte al estudiante, no "usted".
+2. Siempre que sea relevante, usa los datos reales del estudiante para personalizar
+   tu respuesta (su progreso real, su próxima lección pendiente, su nivel de XP).
+3. Si el estudiante tiene dudas técnicas sobre temas de sus cursos (Python, Django,
+   SQL, Power BI, Excel, Java, etc.), explica de forma clara y con ejemplos breves.
+4. Si el estudiante parece desmotivado o atascado, ofrece apoyo y estrategias concretas.
+5. NO inventes información sobre cursos, docentes o contenidos que no estén en los datos.
+6. NO eres un chatbot de propósito general. Si te preguntan algo completamente ajeno
+   a la plataforma o al aprendizaje de TI, redirige amablemente la conversación.
+7. Mantén respuestas concisas (máximo 4 párrafos). Usa listas cuando sea útil.
+8. Si no sabes algo específico del contenido de un módulo, sé honesto y sugiere
+   que el estudiante consulte con su docente o revise los recursos del curso.
+
+Recuerda: tu objetivo es que {ctx['nombre']} progrese, aprenda y se sienta acompañado
+en su camino de formación tecnológica en NEXUS Medellín.
+"""
+
+
+def _limpiar_historial(messages):
+    """
+    Anthropic exige que los mensajes alternen estrictamente user/assistant
+    y que el primero y último sean 'user'. Esta función limpia el historial.
+    """
+    if not messages:
+        return messages
+
+    # Eliminar duplicados consecutivos del mismo rol
+    limpio = [messages[0]]
+    for msg in messages[1:]:
+        if msg['role'] != limpio[-1]['role']:
+            limpio.append(msg)
+
+    # Asegurar que empiece con 'user'
+    if limpio[0]['role'] != 'user':
+        limpio = limpio[1:]
+
+    # Asegurar que termine con 'user'
+    if limpio and limpio[-1]['role'] != 'user':
+        limpio = limpio[:-1]
+
+    return limpio if limpio else [{'role': 'user', 'content': 'Hola'}]

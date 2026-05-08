@@ -1,11 +1,13 @@
 from django.urls import path
 from .views import (
+    NexIAChatView,
     ResumenEstudianteView, CursosEstudianteView, RutasEstudianteView,
     ProgresoEstudianteView, CompletarModuloView,
     CatalogoView, InscribirseView,
     AdminCursosView, AdminCursoDetalleView, DocentesListView,
     DocenteCursosView, DocenteEstudiantesView, DocenteResumenView,
     RecursosView, RecursoDeleteView,
+    TokenVideoView,
     AdminContenidoCursoView, AdminModuloView, AdminModuloDetalleView,
     AdminLeccionView, AdminLeccionDetalleView,
     EstudianteCursoContenidoView, MarcarLeccionVistaView,
@@ -38,9 +40,14 @@ urlpatterns = [
     path('admin/usuarios/',                        AdminUsuariosView.as_view()),
 
     # ── Docente ───────────────────────────────────────────────────────────────
+    path('estudiante/lecciones/<uuid:leccion_id>/token/', TokenVideoView.as_view()),
+
+    # ── Docente ───────────────────────────────────────────────────────────────
     path('docente/resumen/',                              DocenteResumenView.as_view()),
     path('docente/cursos/',                               DocenteCursosView.as_view()),
     path('docente/cursos/<uuid:id>/estudiantes/',         DocenteEstudiantesView.as_view()),
     path('docente/cursos/<uuid:id>/recursos/',            RecursosView.as_view()),
     path('docente/recursos/<uuid:id>/',                   RecursoDeleteView.as_view()),
+    # ── NexIA ─────────────────────────────────────────────────────────────────
+    path('nexia/chat/', NexIAChatView.as_view()),
 ]

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import VideoProtegido from './VideoProtegido';
 
 const authHeaders = () => ({
     headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
@@ -10,14 +11,14 @@ export default function EstudianteCursoVista() {
     const { id } = useParams();
     const navigate = useNavigate();
 
-    const [curso,        setCurso]        = useState(null);
-    const [modulos,      setModulos]      = useState([]);
+    const [curso, setCurso] = useState(null);
+    const [modulos, setModulos] = useState([]);
     const [moduloActivo, setModuloActivo] = useState(null);
-    const [leccionActiva,setLeccionActiva]= useState(null);
-    const [progreso,     setProgreso]     = useState(0);
-    const [loading,      setLoading]      = useState(true);
-    const [error,        setError]        = useState('');
-    const [marcando,     setMarcando]     = useState(false);
+    const [leccionActiva, setLeccionActiva] = useState(null);
+    const [progreso, setProgreso] = useState(0);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
+    
 
     const cargar = async () => {
         setLoading(true);
@@ -41,27 +42,6 @@ export default function EstudianteCursoVista() {
 
     useEffect(() => { cargar(); }, [id]);
 
-    const marcarVista = async () => {
-        if (!leccionActiva || leccionActiva.vista || marcando) return;
-        setMarcando(true);
-        try {
-            await axios.post(`/api/estudiante/lecciones/${leccionActiva.id}/vista/`, {}, authHeaders());
-            // Actualizar estado local
-            const nuevosModulos = modulos.map(m => ({
-                ...m,
-                lecciones: m.lecciones.map(l =>
-                    l.id === leccionActiva.id ? { ...l, vista: true } : l
-                )
-            }));
-            setModulos(nuevosModulos);
-            setLeccionActiva({ ...leccionActiva, vista: true });
-            // Recalcular progreso
-            const total = nuevosModulos.reduce((acc, m) => acc + m.lecciones.length, 0);
-            const vistas = nuevosModulos.reduce((acc, m) => acc + m.lecciones.filter(l => l.vista).length, 0);
-            setProgreso(total > 0 ? Math.round((vistas / total) * 100) : 0);
-        } catch { console.error('Error al marcar como vista'); }
-        finally { setMarcando(false); }
-    };
 
     const seleccionarLeccion = (modulo, leccion) => {
         setModuloActivo(modulo);
@@ -69,13 +49,13 @@ export default function EstudianteCursoVista() {
     };
 
     if (loading) return (
-        <div style={{ display:'flex', alignItems:'center', justifyContent:'center', minHeight:'100vh', color:'#00E5FF', background:'#060B14' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#00E5FF', background: '#060B14' }}>
             Cargando contenido...
         </div>
     );
 
     if (error) return (
-        <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', color:'#f87171', background:'#060B14', gap:'16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', color: '#f87171', background: '#060B14', gap: '16px' }}>
             <p>{error}</p>
             <button onClick={() => navigate('/estudiante-dashboard')} style={btnSecStyle}>← Volver al dashboard</button>
         </div>
@@ -84,41 +64,41 @@ export default function EstudianteCursoVista() {
     const color = curso?.color || '#00E5FF';
 
     return (
-        <div style={{ display:'flex', minHeight:'100vh', background:'#060B14', color:'#EEF2FF' }}>
+        <div style={{ display: 'flex', minHeight: '100vh', background: '#060B14', color: '#EEF2FF' }}>
 
             {/* SIDEBAR */}
             <aside style={{
-                width: '280px', minHeight:'100vh', flexShrink:0,
-                background:'#0D1525', borderRight:'1px solid rgba(0,229,255,0.1)',
-                display:'flex', flexDirection:'column', padding:'20px 0',
+                width: '280px', minHeight: '100vh', flexShrink: 0,
+                background: '#0D1525', borderRight: '1px solid rgba(0,229,255,0.1)',
+                display: 'flex', flexDirection: 'column', padding: '20px 0',
             }}>
                 {/* Header sidebar */}
-                <div style={{ padding:'0 16px 20px', borderBottom:'1px solid rgba(0,229,255,0.1)' }}>
-                    <button onClick={() => navigate('/estudiante-dashboard')} style={{ ...btnSecStyle, marginBottom:'12px', width:'100%', textAlign:'left' }}>
+                <div style={{ padding: '0 16px 20px', borderBottom: '1px solid rgba(0,229,255,0.1)' }}>
+                    <button onClick={() => navigate('/estudiante-dashboard')} style={{ ...btnSecStyle, marginBottom: '12px', width: '100%', textAlign: 'left' }}>
                         ← Dashboard
                     </button>
-                    <h2 style={{ fontSize:'14px', fontWeight:'700', color:'#EEF2FF', lineHeight:'1.4' }}>{curso?.nombre}</h2>
+                    <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#EEF2FF', lineHeight: '1.4' }}>{curso?.nombre}</h2>
 
                     {/* Barra de progreso */}
-                    <div style={{ marginTop:'12px' }}>
-                        <div style={{ display:'flex', justifyContent:'space-between', marginBottom:'6px' }}>
-                            <span style={{ fontSize:'11px', color:'#7A8BA8' }}>Tu progreso</span>
-                            <span style={{ fontSize:'11px', color, fontWeight:'700' }}>{progreso}%</span>
+                    <div style={{ marginTop: '12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
+                            <span style={{ fontSize: '11px', color: '#7A8BA8' }}>Tu progreso</span>
+                            <span style={{ fontSize: '11px', color, fontWeight: '700' }}>{progreso}%</span>
                         </div>
-                        <div style={{ height:'4px', background:'rgba(255,255,255,0.06)', borderRadius:'100px', overflow:'hidden' }}>
-                            <div style={{ height:'100%', width:`${progreso}%`, background: color, borderRadius:'100px', transition:'width 0.4s' }} />
+                        <div style={{ height: '4px', background: 'rgba(255,255,255,0.06)', borderRadius: '100px', overflow: 'hidden' }}>
+                            <div style={{ height: '100%', width: `${progreso}%`, background: color, borderRadius: '100px', transition: 'width 0.4s' }} />
                         </div>
                     </div>
                 </div>
 
                 {/* Lista de módulos y lecciones */}
-                <div style={{ flex:1, overflowY:'auto', padding:'12px 8px' }}>
+                <div style={{ flex: 1, overflowY: 'auto', padding: '12px 8px' }}>
                     {modulos.map(m => (
-                        <div key={m.id} style={{ marginBottom:'8px' }}>
+                        <div key={m.id} style={{ marginBottom: '8px' }}>
                             <p style={{
-                                fontSize:'11px', fontWeight:'700', color:'#7A8BA8',
-                                letterSpacing:'0.1em', textTransform:'uppercase',
-                                padding:'8px 12px', marginBottom:'4px',
+                                fontSize: '11px', fontWeight: '700', color: '#7A8BA8',
+                                letterSpacing: '0.1em', textTransform: 'uppercase',
+                                padding: '8px 12px', marginBottom: '4px',
                             }}>
                                 {m.nombre}
                             </p>
@@ -127,30 +107,30 @@ export default function EstudianteCursoVista() {
                                     key={l.id}
                                     onClick={() => seleccionarLeccion(m, l)}
                                     style={{
-                                        width:'100%', textAlign:'left', padding:'10px 12px',
-                                        borderRadius:'8px', border:'none', cursor:'pointer',
-                                        fontFamily:'inherit', fontSize:'13px',
-                                        display:'flex', alignItems:'center', gap:'10px',
+                                        width: '100%', textAlign: 'left', padding: '10px 12px',
+                                        borderRadius: '8px', border: 'none', cursor: 'pointer',
+                                        fontFamily: 'inherit', fontSize: '13px',
+                                        display: 'flex', alignItems: 'center', gap: '10px',
                                         background: leccionActiva?.id === l.id ? `rgba(${hexToRgb(color)},0.12)` : 'transparent',
-                                        color:       leccionActiva?.id === l.id ? color : '#EEF2FF',
-                                        marginBottom:'2px',
+                                        color: leccionActiva?.id === l.id ? color : '#EEF2FF',
+                                        marginBottom: '2px',
                                     }}
                                 >
                                     {/* Indicador vista */}
                                     <span style={{
-                                        width:'16px', height:'16px', borderRadius:'50%', flexShrink:0,
+                                        width: '16px', height: '16px', borderRadius: '50%', flexShrink: 0,
                                         background: l.vista ? color : 'transparent',
                                         border: `2px solid ${l.vista ? color : 'rgba(255,255,255,0.2)'}`,
-                                        display:'flex', alignItems:'center', justifyContent:'center',
-                                        fontSize:'9px', color:'#060B14', fontWeight:'900',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '9px', color: '#060B14', fontWeight: '900',
                                     }}>
                                         {l.vista ? '✓' : ''}
                                     </span>
-                                    <span style={{ lineHeight:'1.3', flex:1 }}>{l.titulo}</span>
+                                    <span style={{ lineHeight: '1.3', flex: 1 }}>{l.titulo}</span>
                                 </button>
                             ))}
                             {m.lecciones.length === 0 && (
-                                <p style={{ fontSize:'12px', color:'#7A8BA8', padding:'6px 12px' }}>Sin lecciones aún.</p>
+                                <p style={{ fontSize: '12px', color: '#7A8BA8', padding: '6px 12px' }}>Sin lecciones aún.</p>
                             )}
                         </div>
                     ))}
@@ -158,66 +138,50 @@ export default function EstudianteCursoVista() {
             </aside>
 
             {/* CONTENIDO PRINCIPAL */}
-            <main style={{ flex:1, padding:'28px', overflowY:'auto' }}>
+            <main style={{ flex: 1, padding: '28px', overflowY: 'auto' }}>
                 {!leccionActiva ? (
-                    <div style={{ textAlign:'center', padding:'80px', color:'#7A8BA8' }}>
-                        <p style={{ fontSize:'16px' }}>Este curso aún no tiene contenido disponible.</p>
-                        <p style={{ fontSize:'13px', marginTop:'8px' }}>El administrador agregará las lecciones pronto.</p>
+                    <div style={{ textAlign: 'center', padding: '80px', color: '#7A8BA8' }}>
+                        <p style={{ fontSize: '16px' }}>Este curso aún no tiene contenido disponible.</p>
+                        <p style={{ fontSize: '13px', marginTop: '8px' }}>El administrador agregará las lecciones pronto.</p>
                     </div>
                 ) : (
                     <>
                         {/* Header lección */}
-                        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-start', marginBottom:'20px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '20px' }}>
                             <div>
-                                <p style={{ fontSize:'12px', color:'#7A8BA8', marginBottom:'6px' }}>{moduloActivo?.nombre}</p>
-                                <h1 style={{ fontSize:'22px', fontWeight:'800', letterSpacing:'-0.02em' }}>{leccionActiva.titulo}</h1>
+                                <p style={{ fontSize: '12px', color: '#7A8BA8', marginBottom: '6px' }}>{moduloActivo?.nombre}</p>
+                                <h1 style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '-0.02em' }}>{leccionActiva.titulo}</h1>
                                 {leccionActiva.descripcion && (
-                                    <p style={{ fontSize:'13px', color:'#7A8BA8', marginTop:'8px', lineHeight:'1.6', maxWidth:'600px' }}>
+                                    <p style={{ fontSize: '13px', color: '#7A8BA8', marginTop: '8px', lineHeight: '1.6', maxWidth: '600px' }}>
                                         {leccionActiva.descripcion}
                                     </p>
                                 )}
                             </div>
-                            {!leccionActiva.vista ? (
-                                <button
-                                    onClick={marcarVista}
-                                    disabled={marcando}
-                                    style={{ ...btnPrimStyle, background: color, opacity: marcando ? 0.7 : 1, flexShrink:0 }}
-                                >
-                                    {marcando ? 'Guardando...' : '✓ Marcar como vista'}
-                                </button>
-                            ) : (
-                                <span style={{
-                                    padding:'8px 16px', borderRadius:'8px', fontSize:'13px', fontWeight:'700',
-                                    background:`rgba(${hexToRgb(color)},0.1)`,
-                                    border:`1px solid ${color}`, color,
-                                }}>
-                                    ✓ Completada
-                                </span>
-                            )}
+
                         </div>
 
-                        {/* Video */}
-                        {leccionActiva.video_url ? (
-                            <div style={{ borderRadius:'14px', overflow:'hidden', border:'1px solid rgba(255,255,255,0.08)', marginBottom:'20px' }}>
-                                <iframe
-                                    width="100%"
-                                    height="500"
-                                    src={leccionActiva.video_url}
-                                    title={leccionActiva.titulo}
-                                    frameBorder="0"
-                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                    allowFullScreen
-                                    style={{ display:'block' }}
-                                />
-                            </div>
-                        ) : (
-                            <div style={{ textAlign:'center', padding:'60px', background:'rgba(255,255,255,0.03)', borderRadius:'14px', color:'#7A8BA8', marginBottom:'20px' }}>
-                                Esta lección no tiene video aún.
-                            </div>
-                        )}
+                        {/* protección video desde youtube */}
+                        <VideoProtegido
+                            leccionId={leccionActiva.id}
+                            titulo={leccionActiva.titulo}
+                            yaVisto={leccionActiva.vista}
+                            onVisto={(id) => {
+                                const nuevosModulos = modulos.map(m => ({
+                                    ...m,
+                                    lecciones: m.lecciones.map(l =>
+                                        l.id === id ? { ...l, vista: true } : l
+                                    )
+                                }));
+                                setModulos(nuevosModulos);
+                                setLeccionActiva({ ...leccionActiva, vista: true });
+                                const total = nuevosModulos.reduce((acc, m) => acc + m.lecciones.length, 0);
+                                const vistas = nuevosModulos.reduce((acc, m) => acc + m.lecciones.filter(l => l.vista).length, 0);
+                                setProgreso(total > 0 ? Math.round((vistas / total) * 100) : 0);
+                            }}
+                        />
 
                         {/* Navegación entre lecciones */}
-                        <div style={{ display:'flex', justifyContent:'space-between', gap:'12px' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px' }}>
                             {(() => {
                                 const todasLecciones = modulos.flatMap(m => m.lecciones.map(l => ({ ...l, modulo: m })));
                                 const idx = todasLecciones.findIndex(l => l.id === leccionActiva.id);
@@ -251,16 +215,16 @@ export default function EstudianteCursoVista() {
 }
 
 const btnPrimStyle = {
-    background:'#00E5FF', color:'#060B14', border:'none',
-    borderRadius:'8px', padding:'9px 18px', fontWeight:'700',
-    fontSize:'13px', cursor:'pointer', fontFamily:'inherit',
+    background: '#00E5FF', color: '#060B14', border: 'none',
+    borderRadius: '8px', padding: '9px 18px', fontWeight: '700',
+    fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit',
 };
 const btnSecStyle = {
-    background:'transparent', border:'1px solid rgba(255,255,255,0.15)',
-    borderRadius:'8px', padding:'7px 14px', color:'#7A8BA8',
-    fontSize:'13px', cursor:'pointer', fontFamily:'inherit',
+    background: 'transparent', border: '1px solid rgba(255,255,255,0.15)',
+    borderRadius: '8px', padding: '7px 14px', color: '#7A8BA8',
+    fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit',
 };
 const hexToRgb = (hex) => {
     const r = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-    return r ? `${parseInt(r[1],16)},${parseInt(r[2],16)},${parseInt(r[3],16)}` : '0,229,255';
+    return r ? `${parseInt(r[1], 16)},${parseInt(r[2], 16)},${parseInt(r[3], 16)}` : '0,229,255';
 };
