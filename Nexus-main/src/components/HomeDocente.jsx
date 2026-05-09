@@ -1,3 +1,4 @@
+import { useNexusModal } from './NexusModal';
 import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -14,7 +15,7 @@ const multipartHeaders = () => ({
     }
 });
 
-// ── ICONOS ────────────────────────────────────────────────────────────────────
+//  ICONOS 
 const IconHome = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>;
 const IconUser = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
 const IconBook = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><path d="M4 19.5A2.5 2.5 0 016.5 17H20" /><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z" /></svg>;
@@ -31,9 +32,9 @@ const IconFile = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="non
 const IconTrash = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6" /><path d="M10 11v6M14 11v6" /><path d="M9 6V4h6v2" /></svg>;
 const IconBack = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><polyline points="15 18 9 12 15 6" /></svg>;
 
-// ── HELPERS ───────────────────────────────────────────────────────────────────
+//  HELPERS 
 const Loader = () => <div style={{ padding: '40px', textAlign: 'center', color: '#7a8ba8' }}>Cargando...</div>;
-const ErrorMsg = ({ msg }) => <div style={{ padding: '16px', color: '#f87171', background: 'rgba(248,113,113,0.1)', borderRadius: '8px', margin: '16px 0' }}>⚠️ {msg}</div>;
+const ErrorMsg = ({ msg }) => <div style={{ padding: '16px', color: '#f87171', background: 'rgba(248,113,113,0.1)', borderRadius: '8px', marginBottom: '12px' }}>⚠ {msg}</div>;
 
 const StatCard = ({ label, value, icon, color, sub }) => (
     <div className="nd-stat-card" style={{ borderTopColor: color }}>
@@ -49,9 +50,159 @@ const StatCard = ({ label, value, icon, color, sub }) => (
 const TIPO_ICON = { pdf: '📄', docx: '📝', xlsx: '📊', csv: '📋', otro: '📎' };
 const TIPO_COLOR = { pdf: '#f87171', docx: '#60a5fa', xlsx: '#4ade80', csv: '#fbbf24', otro: '#a78bfa' };
 
-// ── COMPONENTE PRINCIPAL ──────────────────────────────────────────────────────
+//  COMPONENTE PRINCIPAL 
+// VistaPerfil_ — componente independiente para evitar re-montaje al escribir
+const VistaPerfil_ = ({ nombre, email, especialidad, initials, avatar, fileRef, handleAvatar }) => {
+    const [bio,      setBio]      = React.useState('');
+    const [editBio,  setEditBio]  = React.useState(false);
+    const [bioTemp,  setBioTemp]  = React.useState('');
+    const [pass,     setPass]     = React.useState({ actual: '', nueva: '', confirmar: '' });
+    const [passMsg,  setPassMsg]  = React.useState('');
+    const [showPass, setShowPass] = React.useState({ actual: false, nueva: false, confirmar: false });
+
+    const authH = () => ({ headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` } });
+
+    React.useEffect(() => {
+        axios.get('/api/perfil/', authH()).then(res => {
+            if (res.data.biografia) setBio(res.data.biografia);
+        }).catch(() => {});
+    }, []);
+
+    const guardarBio = async () => {
+        try {
+            await axios.patch('/api/perfil/', { biografia: bioTemp }, authH());
+            setBio(bioTemp);
+            setEditBio(false);
+        } catch (err) { console.error('Error guardando bio:', err); }
+    };
+
+    const handlePassSave = async () => {
+        setPassMsg('');
+        if (!pass.actual || !pass.nueva || !pass.confirmar) { setPassMsg('err:Todos los campos son obligatorios.'); return; }
+        if (pass.nueva !== pass.confirmar) { setPassMsg('err:Las nuevas contraseñas no coinciden.'); return; }
+        try {
+            await axios.post('/api/cambiar-password-perfil/',
+                { password_actual: pass.actual, nueva_password: pass.nueva }, authH());
+            setPassMsg('ok:Contraseña actualizada correctamente.');
+            setPass({ actual: '', nueva: '', confirmar: '' });
+        } catch (err) {
+            setPassMsg(`err:${err.response?.data?.error || 'Error al conectar con el servidor.'}`);
+        }
+    };
+
+    return (
+        <div className="nd-view nd-fade-in">
+            <div className="nd-section-title">Mi Perfil</div>
+            <div className="nd-profile-card">
+                <div className="nd-avatar-section">
+                    <div className="nd-avatar-wrapper">
+                        {avatar ? <img src={avatar} alt="av" className="nd-avatar-xl" />
+                            : <div className="nd-avatar-initials-xl">{initials}</div>}
+                        <button className="nd-avatar-edit-btn" onClick={() => fileRef.current.click()}>
+                            <IconCamera />
+                        </button>
+                        <input ref={fileRef} type="file" accept="image/*"
+                            style={{ display: 'none' }} onChange={handleAvatar} />
+                    </div>
+                    <div className="nd-profile-name-section">
+                        <h3 className="nd-profile-name">{nombre}</h3>
+                        <span className="nd-profile-badge">{especialidad}</span>
+                        <span className="nd-profile-email">{email}</span>
+                    </div>
+                </div>
+                <div className="nd-profile-readonly">
+                    <p className="nd-readonly-note">Los siguientes campos no son editables.</p>
+                    <div className="nd-readonly-grid">
+                        {[
+                            { label: 'Nombre completo', value: nombre },
+                            { label: 'Especialidad',    value: especialidad },
+                            { label: 'Correo',          value: email },
+                            { label: 'Rol',             value: 'Docente', tag: true },
+                        ].map(({ label, value, tag }) => (
+                            <div key={label} className="nd-readonly-field">
+                                <label>{label}</label>
+                                <div className={`nd-readonly-value${tag ? ' nd-role-tag' : ''}`}>{value}</div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+
+            <div className="nd-edit-card">
+                <div className="nd-edit-card-header">
+                    <span>Descripción / Biografía</span>
+                    {!editBio && (
+                        <button className="nd-btn-ghost" onClick={() => { setEditBio(true); setBioTemp(bio); }}>
+                            <IconEdit /> Editar
+                        </button>
+                    )}
+                </div>
+                {editBio ? (
+                    <div className="nd-bio-edit">
+                        <textarea className="nd-textarea" rows={4} maxLength={300}
+                            placeholder="Cuéntale a tus estudiantes sobre ti..."
+                            value={bioTemp} onChange={e => setBioTemp(e.target.value)} />
+                        <span className="nd-char-count">{bioTemp.length}/300</span>
+                        <div className="nd-edit-actions">
+                            <button className="nd-btn-secondary" onClick={() => setEditBio(false)}>Cancelar</button>
+                            <button className="nd-btn-primary" onClick={guardarBio}>
+                                <IconSave /> Guardar
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <p className="nd-bio-text">{bio || 'No has agregado una descripción todavía.'}</p>
+                )}
+            </div>
+
+            <div className="nd-edit-card">
+                <div className="nd-edit-card-header">
+                    <span className="nd-lock-title"><IconLock /> Cambiar Contraseña</span>
+                </div>
+                <div className="nd-pass-grid">
+                    {[
+                        { label: 'Contraseña actual',    key: 'actual'    },
+                        { label: 'Nueva contraseña',     key: 'nueva'     },
+                        { label: 'Confirmar contraseña', key: 'confirmar' },
+                    ].map(({ label, key }) => (
+                        <div className="nd-pass-field" key={key}>
+                            <label>{label}</label>
+                            <div className="nd-pass-input-wrap">
+                                <input
+                                    type={showPass[key] ? 'text' : 'password'}
+                                    value={pass[key]}
+                                    onChange={e => setPass(prev => ({ ...prev, [key]: e.target.value }))}
+                                    className="nd-input"
+                                    placeholder="••••••••"
+                                    autoComplete="new-password"
+                                />
+                                <button className="nd-pass-toggle" type="button"
+                                    onClick={() => setShowPass(p => ({ ...p, [key]: !p[key] }))}>
+                                    <IconEye />
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+                {passMsg && (
+                    <div className={`nd-msg ${passMsg.startsWith('ok') ? 'nd-msg-ok' : 'nd-msg-err'}`}>
+                        {passMsg.split(':')[1]}
+                    </div>
+                )}
+                <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
+                    <button className="nd-btn-primary" onClick={handlePassSave}
+                        style={{ padding: '10px 32px', width: 'auto' }}>
+                        <IconSave /> Actualizar contraseña
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 export default function HomeDocente() {
     const navigate = useNavigate();
+    const { modalJSX, showAlert, showConfirm } = useNexusModal();
     const fileRef = useRef(null);
     const archivoRef = useRef(null);
 
@@ -71,19 +222,36 @@ export default function HomeDocente() {
     const especialidad = localStorage.getItem('especialidad') || 'Docente NEXUS';
     const initials = nombre.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
-    const cerrarSesion = () => {
-        if (window.confirm('¿Estás seguro de que deseas salir?')) {
-            localStorage.clear();
-            navigate('/login');
-        }
+    const cerrarSesion = async () => {
+        const ok = await showConfirm('Seras redirigido al inicio de sesion.', {
+            type: 'warning', title: 'Cerrar sesion',
+            confirmLabel: 'Si, salir', cancelLabel: 'Cancelar',
+        });
+        if (!ok) return;
+        localStorage.clear();
+        navigate('/login');
     };
 
-    const handleAvatar = (e) => {
+    const handleAvatar = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
+        // Preview inmediato
         const reader = new FileReader();
         reader.onloadend = () => setAvatar(reader.result);
         reader.readAsDataURL(file);
+        // Guardar en backend
+        const formData = new FormData();
+        formData.append('foto_perfil', file);
+        try {
+            await axios.patch('/api/perfil/', formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+                    'Content-Type': 'multipart/form-data',
+                }
+            });
+        } catch (err) {
+            console.error('Error al guardar foto:', err);
+        }
     };
 
     const handlePassSave = async () => {
@@ -109,13 +277,21 @@ export default function HomeDocente() {
         { id: 'estudiantes', label: 'Mis Estudiantes', icon: <IconStudents /> },
     ];
 
-    // ── VISTA: INICIO ─────────────────────────────────────────────────────────
+    //  VISTA: INICIO 
     const VistaInicio = () => {
         const [resumen, setResumen] = useState(null);
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState('');
 
-        useEffect(() => {
+        // Cargar perfil desde backend al montar
+    useEffect(() => {
+        axios.get('/api/perfil/', authHeaders()).then(res => {
+            if (res.data.biografia) setBio(res.data.biografia);
+            if (res.data.foto_perfil) setAvatar(res.data.foto_perfil);
+        }).catch(() => {});
+    }, []);
+
+    useEffect(() => {
             axios.get('/api/docente/resumen/', authHeaders())
                 .then(res => setResumen(res.data))
                 .catch(() => setError('No se pudo cargar el resumen.'))
@@ -158,7 +334,7 @@ export default function HomeDocente() {
         );
     };
 
-    // ── VISTA: MIS CURSOS ─────────────────────────────────────────────────────
+    //  VISTA: MIS CURSOS 
     const VistaCursos = () => {
         const [cursos, setCursos] = useState([]);
         const [loading, setLoading] = useState(true);
@@ -373,7 +549,7 @@ export default function HomeDocente() {
         );
     };
 
-    // ── VISTA: MIS ESTUDIANTES ────────────────────────────────────────────────
+    //  VISTA: MIS ESTUDIANTES 
     const VistaEstudiantes = () => {
         const [cursos, setCursos] = useState([]);
         const [cursoSel, setCursoSel] = useState('');
@@ -469,106 +645,13 @@ export default function HomeDocente() {
         );
     };
 
-    // ── VISTA: PERFIL ─────────────────────────────────────────────────────────
+    //  VISTA: PERFIL 
     const VistaPerfil = () => (
-        <div className="nd-view nd-fade-in">
-            <div className="nd-section-title">Mi Perfil</div>
-            <div className="nd-profile-card">
-                <div className="nd-avatar-section">
-                    <div className="nd-avatar-wrapper">
-                        {avatar ? <img src={avatar} alt="av" className="nd-avatar-xl" />
-                            : <div className="nd-avatar-initials-xl">{initials}</div>}
-                        <button className="nd-avatar-edit-btn" onClick={() => fileRef.current.click()}>
-                            <IconCamera />
-                        </button>
-                        <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleAvatar} />
-                    </div>
-                    <div className="nd-profile-name-section">
-                        <h3 className="nd-profile-name">{nombre}</h3>
-                        <span className="nd-profile-badge">{especialidad}</span>
-                        <span className="nd-profile-email">{email}</span>
-                    </div>
-                </div>
-                <div className="nd-profile-readonly">
-                    <p className="nd-readonly-note">Los siguientes campos no son editables.</p>
-                    <div className="nd-readonly-grid">
-                        {[
-                            { label: 'Nombre completo', value: nombre },
-                            { label: 'Especialidad', value: especialidad },
-                            { label: 'Correo', value: email },
-                            { label: 'Rol', value: 'Docente', tag: true },
-                        ].map(({ label, value, tag }) => (
-                            <div key={label} className="nd-readonly-field">
-                                <label>{label}</label>
-                                <div className={`nd-readonly-value${tag ? ' nd-role-tag' : ''}`}>{value}</div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </div>
-
-            <div className="nd-edit-card">
-                <div className="nd-edit-card-header">
-                    <span>Descripción / Biografía</span>
-                    {!editBio && (
-                        <button className="nd-btn-ghost" onClick={() => { setEditBio(true); setBioTemp(bio); }}>
-                            <IconEdit /> Editar
-                        </button>
-                    )}
-                </div>
-                {editBio ? (
-                    <div className="nd-bio-edit">
-                        <textarea className="nd-textarea" rows={4} maxLength={300}
-                            placeholder="Cuéntale a tus estudiantes sobre ti..."
-                            value={bioTemp} onChange={e => setBioTemp(e.target.value)} />
-                        <span className="nd-char-count">{bioTemp.length}/300</span>
-                        <div className="nd-edit-actions">
-                            <button className="nd-btn-secondary" onClick={() => setEditBio(false)}>Cancelar</button>
-                            <button className="nd-btn-primary" onClick={() => { setBio(bioTemp); setEditBio(false); }}>
-                                <IconSave /> Guardar
-                            </button>
-                        </div>
-                    </div>
-                ) : (
-                    <p className="nd-bio-text">{bio || 'No has agregado una descripción todavía.'}</p>
-                )}
-            </div>
-
-            <div className="nd-edit-card">
-                <div className="nd-edit-card-header">
-                    <span className="nd-lock-title"><IconLock /> Cambiar Contraseña</span>
-                </div>
-                <div className="nd-pass-grid">
-                    {[
-                        { name: 'actual', label: 'Contraseña actual', key: 'actual' },
-                        { name: 'nueva', label: 'Nueva contraseña', key: 'nueva' },
-                        { name: 'confirmar', label: 'Confirmar contraseña', key: 'confirmar' },
-                    ].map(({ name, label, key }) => (
-                        <div className="nd-pass-field" key={name}>
-                            <label>{label}</label>
-                            <div className="nd-pass-input-wrap">
-                                <input type={showPass[key] ? 'text' : 'password'} name={name}
-                                    value={pass[name]}
-                                    onChange={e => setPass({ ...pass, [e.target.name]: e.target.value })}
-                                    className="nd-input" placeholder="••••••••••" />
-                                <button className="nd-pass-toggle" type="button"
-                                    onClick={() => setShowPass(p => ({ ...p, [key]: !p[key] }))}>
-                                    <IconEye />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-                {passMsg && (
-                    <div className={`nd-msg ${passMsg.startsWith('ok') ? 'nd-msg-ok' : 'nd-msg-err'}`}>
-                        {passMsg.split(':')[1]}
-                    </div>
-                )}
-                <button className="nd-btn-primary nd-mt" onClick={handlePassSave}>
-                    <IconSave /> Actualizar contraseña
-                </button>
-            </div>
-        </div>
+        <VistaPerfil_
+            nombre={nombre} email={email} especialidad={especialidad}
+            initials={initials} avatar={avatar} fileRef={fileRef}
+            handleAvatar={handleAvatar}
+        />
     );
 
     const views = {
@@ -579,6 +662,8 @@ export default function HomeDocente() {
     };
 
     return (
+        <>
+        {modalJSX}
         <div className="nd-layout">
             <aside className="nd-sidebar">
                 <div className="nd-sidebar-logo">NEX<span>U</span>S <span className="nd-sidebar-tag">DOCENTE</span></div>
@@ -621,10 +706,11 @@ export default function HomeDocente() {
                 </div>
             </main>
         </div>
+        </>
     );
 }
 
-// ── ESTILOS INLINE ────────────────────────────────────────────────────────────
+//  ESTILOS INLINE 
 const quickBtnStyle = (color) => ({
     display: 'flex', alignItems: 'center', gap: '8px',
     padding: '10px 18px', borderRadius: '8px',

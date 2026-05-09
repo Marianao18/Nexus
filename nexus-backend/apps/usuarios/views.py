@@ -16,7 +16,7 @@ class RegistroView(APIView):
         if serializer.is_valid():
             usuario = serializer.save()
             return Response(
-                {"mensaje": "Cuenta creada con éxito.", "email": usuario.email},
+                {"mensaje": "Cuenta creada con ÃÂ©xito.", "email": usuario.email},
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -76,13 +76,13 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response(
-                {"mensaje": "Sesión cerrada correctamente."},
+                {"mensaje": "SesiÃÂ³n cerrada correctamente."},
                 status=status.HTTP_200_OK
             )
         except TokenError:
-            # Token ya expirado o inválido → igual limpiamos la sesión
+            # Token ya expirado o invÃÂ¡lido Ã¢ÂÂ igual limpiamos la sesiÃÂ³n
             return Response(
-                {"mensaje": "Sesión cerrada."},
+                {"mensaje": "SesiÃÂ³n cerrada."},
                 status=status.HTTP_200_OK
             )
 
@@ -92,11 +92,43 @@ class PerfilView(APIView):
 
     def get(self, request):
         u = request.user
+        foto_url = None
+        if u.foto_perfil:
+            foto_url = request.build_absolute_uri(u.foto_perfil.url)
         return Response({
-            "nombre":         u.nombre,
-            "email":          u.email,
-            "rol":            u.rol,
-            "fecha_registro": u.fecha_registro,
+            'nombre':         u.nombre,
+            'email':          u.email,
+            'rol':            u.rol,
+            'fecha_registro': u.fecha_registro,
+            'biografia':      u.biografia or '',
+            'foto_perfil':    foto_url,
+            'avatar_id':      u.avatar_id or '',
+        })
+
+    def patch(self, request):
+        u = request.user
+        if 'biografia' in request.data:
+            u.biografia = str(request.data['biografia'])[:500]
+        if 'avatar_id' in request.data:
+            u.avatar_id = str(request.data['avatar_id'])[:20]
+        if 'foto_perfil' in request.FILES:
+            if u.foto_perfil:
+                try:
+                    import os
+                    if os.path.isfile(u.foto_perfil.path):
+                        os.remove(u.foto_perfil.path)
+                except Exception:
+                    pass
+            u.foto_perfil = request.FILES['foto_perfil']
+        u.save()
+        foto_url = None
+        if u.foto_perfil:
+            foto_url = request.build_absolute_uri(u.foto_perfil.url)
+        return Response({
+            'mensaje':     'Perfil actualizado correctamente.',
+            'biografia':   u.biografia,
+            'foto_perfil': foto_url,
+            'avatar_id':   u.avatar_id,
         })
 
 
@@ -133,10 +165,10 @@ class RegistroEstudianteView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
 
-        # Validación básica
+        # ValidaciÃÂ³n bÃÂ¡sica
         if not email or not password:
             return Response(
-                {"error": "Email y contraseña son obligatorios"}, 
+                {"error": "Email y contraseÃÂ±a son obligatorios"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -155,7 +187,7 @@ class RegistroEstudianteView(APIView):
                 rol='estudiante'
             )
             return Response(
-                {"mensaje": "Estudiante creado con éxito"}, 
+                {"mensaje": "Estudiante creado con ÃÂ©xito"}, 
                 status=status.HTTP_201_CREATED
             )
         except Exception as e:
@@ -174,7 +206,7 @@ class CambiarPasswordObligatorioView(APIView):
         
         if nueva_password:
             usuario.set_password(nueva_password)
-            # Si usas el campo de cambio obligatorio, aquí lo desactivamos
+            # Si usas el campo de cambio obligatorio, aquÃÂ­ lo desactivamos
             # usuario.debe_cambiar_password = False 
             usuario.save()
             return Response({"mensaje": "Password actualizado"}, status=status.HTTP_200_OK)
@@ -191,15 +223,15 @@ class CambiarPasswordPerfilView(APIView):
         password_actual = request.data.get('password_actual')
         nueva_password = request.data.get('nueva_password')
 
-        # 1. Validar que la contraseña actual sea correcta
+        # 1. Validar que la contraseÃÂ±a actual sea correcta
         if not user.check_password(password_actual):
-            return Response({'error': 'La contraseña actual es incorrecta.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'La contraseÃÂ±a actual es incorrecta.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 2. Cambiar la contraseña
+        # 2. Cambiar la contraseÃÂ±a
         user.set_password(nueva_password)
         user.save()
         
-        return Response({'mensaje': 'Contraseña actualizada correctamente.'}, status=status.HTTP_200_OK)
+        return Response({'mensaje': 'ContraseÃÂ±a actualizada correctamente.'}, status=status.HTTP_200_OK)
     
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -225,7 +257,7 @@ class EliminarUsuarioView(APIView):
         try:
             usuario = Usuario.objects.get(id=id)
 
-            # Evitar que el admin se elimine a sí mismo
+            # Evitar que el admin se elimine a sÃÂ­ mismo
             if usuario.id == request.user.id:
                 return Response(
                     {'error': 'No puedes eliminar tu propia cuenta'},

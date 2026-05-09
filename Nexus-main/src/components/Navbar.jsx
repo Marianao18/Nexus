@@ -1,3 +1,4 @@
+import { useNexusModal } from './NexusModal';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import styles from './Navbar.module.css'; 
@@ -49,13 +50,13 @@ export default function Navbar() {
 
     return (
         <nav className={styles.nav}>
-            {/* --- SECCIÓN LOGO --- */}
+            {/* --- SECCIÃN LOGO --- */}
             <Link to="/" className={styles.logo}>
                 <div className={styles.logoMark}><LogoIcon /></div>
                 <span className={styles.logoText}>NEX<span>U</span>S</span>
             </Link>
 
-            {/* --- ENLACES DE NAVEGACIÓN --- */}
+            {/* --- ENLACES DE NAVEGACIÃN --- */}
             <ul className={styles.links}>
                 {/* 1. Solo para Visitantes (No logueados) */}
                 {!user.role && (
@@ -76,7 +77,7 @@ export default function Navbar() {
                 )}
             </ul>
 
-            {/* --- SECCIÓN DE AUTENTICACIÓN --- */}
+            {/* --- SECCIÃN DE AUTENTICACIÃN --- */}
             <div className={styles.authSection}>
                 {user.name ? (
                     <div className={styles.userContainer}>

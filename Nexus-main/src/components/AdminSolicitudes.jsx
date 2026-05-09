@@ -1,3 +1,4 @@
+import { useNexusModal } from './NexusModal';
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './AdminSolicitudes.css';
@@ -25,7 +26,7 @@ const AdminSolicitudes = () => {
         cargarDatos();
     }, []);
 
-    // 2. FUNCIÓN PARA APROBAR (Crea usuario y envía correo)
+    // 2. FUNCIÃN PARA APROBAR (Crea usuario y envía correo)
     const aprobar = async (id) => {
         if (window.confirm("¿Deseas convertir a este postulante en docente oficial?")) {
             try {
@@ -58,7 +59,7 @@ const AdminSolicitudes = () => {
         }
     };
 
-    // 3. FUNCIÓN PARA RECHAZAR (Elimina y notifica al docente)
+    // 3. FUNCIÃN PARA RECHAZAR (Elimina y notifica al docente)
     const rechazar = async (id) => {
         if (window.confirm("¿Estás seguro de rechazar esta solicitud? Se enviará un correo de notificación.")) {
             try {
@@ -228,7 +229,7 @@ const verMas = (solicitud) => {
                             className="na-close-btn"
                             onClick={() => setModalAbierto(false)}
                         >
-                            ✕
+                            â
                         </button>
 
                     </div>
@@ -298,7 +299,7 @@ const verMas = (solicitud) => {
 );
 };
 
-// --- ESTILOS PARA MANTENER LA ESTÉTICA NEXUS ---
+// --- ESTILOS PARA MANTENER LA ESTÃTICA NEXUS ---
 const styles = {
     container: { marginTop: '20px', animation: 'fadeIn 0.5s ease-in' },
     header: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' },

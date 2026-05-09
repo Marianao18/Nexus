@@ -1,3 +1,4 @@
+import { useNexusModal } from './NexusModal';
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
@@ -122,7 +123,7 @@ export default function AdminContenidoCurso() {
     if (error) return (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', color:'#f87171', background:'#060B14', gap:'16px' }}>
             <p>{error}</p>
-            <button onClick={() => navigate('/admin-dashboard')} style={btnSecStyle}>← Volver al panel</button>
+            <button onClick={() => navigate('/admin-dashboard')} style={btnSecStyle}>â Volver al panel</button>
         </div>
     );
 
@@ -133,13 +134,13 @@ export default function AdminContenidoCurso() {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'28px' }}>
                 <div>
                     <button onClick={() => navigate('/admin-dashboard')} style={btnSecStyle}>
-                        ← Volver al panel
+                        â Volver al panel
                     </button>
                     <h1 style={{ fontSize:'28px', fontWeight:'800', marginTop:'10px', letterSpacing:'-0.02em' }}>
                         {curso?.nombre}
                     </h1>
                     <p style={{ color:'#7A8BA8', fontSize:'13px', marginTop:'4px' }}>
-                        Gestión de contenido · Solo visible para administradores
+                        Gestión de contenido Â· Solo visible para administradores
                     </p>
                 </div>
                 {moduloActivo && (
@@ -147,12 +148,12 @@ export default function AdminContenidoCurso() {
                         onClick={() => { setMostrarFormLec(!mostrarFormLec); setMsg(''); }}
                         style={mostrarFormLec ? btnSecStyle : btnPrimStyle}
                     >
-                        {mostrarFormLec ? '✕ Cancelar' : '+ Agregar lección'}
+                        {mostrarFormLec ? 'â Cancelar' : '+ Agregar lección'}
                     </button>
                 )}
             </div>
 
-            {/* FORMULARIO NUEVA LECCIÓN */}
+            {/* FORMULARIO NUEVA LECCIÃN */}
             {mostrarFormLec && moduloActivo && (
                 <div style={{ ...cardStyle, marginBottom:'24px', borderColor:'rgba(0,229,255,0.3)' }}>
                     <h3 style={{ fontSize:'15px', fontWeight:'700', marginBottom:'16px', color:'#00E5FF' }}>
@@ -201,7 +202,7 @@ export default function AdminContenidoCurso() {
             {/* GRID PRINCIPAL */}
             <div style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:'20px' }}>
 
-                {/* SIDEBAR MÓDULOS */}
+                {/* SIDEBAR MÃDULOS */}
                 <div style={cardStyle}>
                     <h3 style={{ color:'#00E5FF', marginBottom:'16px', fontSize:'14px', fontWeight:'700', letterSpacing:'0.08em', textTransform:'uppercase' }}>
                         Módulos
@@ -243,7 +244,7 @@ export default function AdminContenidoCurso() {
                             <button
                                 onClick={() => eliminarModulo(m.id)}
                                 style={{ background:'transparent', border:'none', cursor:'pointer', color:'#f87171', fontSize:'14px', padding:'2px 6px' }}
-                            >✕</button>
+                            >â</button>
                         </div>
                     ))}
                 </div>
@@ -333,7 +334,7 @@ export default function AdminContenidoCurso() {
     );
 }
 
-// ── ESTILOS ───────────────────────────────────────────────────────────────────
+// ââ ESTILOS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
 const cardStyle = {
     background: 'rgba(13,21,37,0.95)',
     border: '1px solid rgba(0,229,255,0.12)',

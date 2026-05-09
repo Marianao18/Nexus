@@ -31,7 +31,10 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     fecha_registro = models.DateTimeField(auto_now_add=True)
     is_active      = models.BooleanField(default=True)
     is_staff       = models.BooleanField(default=False)
-    debe_cambiar_password = models.BooleanField(default=False) 
+    debe_cambiar_password = models.BooleanField(default=False)
+    biografia   = models.TextField(blank=True, default='')
+    foto_perfil = models.ImageField(upload_to='fotos_perfil/', blank=True, null=True)
+    avatar_id   = models.CharField(max_length=20, blank=True, default='')  # oso, gato, tortuga, ave
 
     objects = UsuarioManager()
 

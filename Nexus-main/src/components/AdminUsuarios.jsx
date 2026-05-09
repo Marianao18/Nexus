@@ -1,3 +1,4 @@
+import { useNexusModal } from './NexusModal';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './AdminUsuarios.css';
@@ -6,6 +7,7 @@ const authHeaders = () => ({
 });
 
 const AdminUsuarios = () => {
+    const { modalJSX, showAlert, showConfirm } = useNexusModal();
     const [data,    setData]    = useState({ estudiantes: [], docentes: [] });
     const [loading, setLoading] = useState(true);
     const [error,   setError]   = useState('');
@@ -27,12 +29,8 @@ const AdminUsuarios = () => {
     const usuarios = tab === 'estudiantes' ? data.estudiantes : data.docentes;
 
     const eliminarUsuario = async (id, nombre) => {
-
-    const confirmar = window.confirm(
-        `¿Deseas eliminar a ${nombre}?`
-    );
-
-    if (!confirmar) return;
+    const ok = await showConfirm(`¿Eliminar a ${nombre}? Esta acción no se puede deshacer.`, { type: 'danger', title: 'Eliminar usuario', confirmLabel: 'Sí, eliminar' });
+    if (!ok) return;
 
     try {
 
@@ -47,13 +45,13 @@ const AdminUsuarios = () => {
             [tab]: prev[tab].filter(user => user.id !== id)
         }));
 
-        alert('Usuario eliminado correctamente');
+        await showAlert(`${nombre} fue eliminado correctamente.`, 'success');
 
     } catch (error) {
 
         console.error(error);
 
-        alert(
+        await showAlert(
             error.response?.data?.error ||
             'No se pudo eliminar el usuario'
         );
@@ -74,6 +72,8 @@ const AdminUsuarios = () => {
     });
 
     return (
+        <>
+        {modalJSX}
         <div className="na-table-container na-fade-in">
 
             {/* Header */}
@@ -83,7 +83,7 @@ const AdminUsuarios = () => {
                         Gestión de Usuarios
                     </h2>
                     <p style={{ margin:'4px 0 0', color:'#7A8BA8', fontSize:'13px' }}>
-                        {data.estudiantes.length} estudiantes · {data.docentes.length} docentes
+                        {data.estudiantes.length} estudiantes Â· {data.docentes.length} docentes
                     </p>
                 </div>
             </div>
@@ -105,7 +105,7 @@ const AdminUsuarios = () => {
 
             {error && (
                 <div style={{ color:'#f87171', padding:'16px', background:'rgba(248,113,113,0.1)', borderRadius:'8px' }}>
-                    ⚠️ {error}
+                    â ï¸ {error}
                 </div>
             )}
 
@@ -177,7 +177,8 @@ const AdminUsuarios = () => {
                 </div>
             )}
         </div>
+        </>
     );
-};
+}
 
 export default AdminUsuarios;

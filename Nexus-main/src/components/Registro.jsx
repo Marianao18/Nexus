@@ -1,4 +1,5 @@
-    import React, { useState } from 'react';
+    import { useNexusModal } from './NexusModal';
+import React, { useState } from 'react';
     import { useNavigate, Link } from 'react-router-dom';
     import axios from 'axios';
     import './Registro.css';
@@ -17,7 +18,7 @@
         // 2. Lógica de Validaciones
         const validarFormulario = () => {
             // Nombre: Solo letras y espacios
-            const regexNombre = /^[a-zA-ZñÑáéíóúÁÉÍÓÚ\s]+$/;
+            const regexNombre = /^[a-zA-ZñÃáéíóúÃÃÃÃÃ\s]+$/;
             if (!regexNombre.test(nombre.trim())) {
                 return "El nombre no puede contener números ni símbolos.";
             }
