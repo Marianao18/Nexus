@@ -1,0 +1,316 @@
+import { useNexusModal } from './NexusModal';
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+import './AdminSolicitudes.css';
+
+const AdminSolicitudes = () => {
+    const [solicitudes, setSolicitudes] = useState([]);
+    const [cargando, setCargando] = useState(true);
+    const [modalAbierto, setModalAbierto] = useState(false);
+    const [solicitudSeleccionada, setSolicitudSeleccionada] = useState(null);
+
+    // 1. CARGAR SOLICITUDES AL MONTAR
+    useEffect(() => {
+        const cargarDatos = async () => {
+            try {
+                const res = await axios.get('/api/admin/solicitudes/', {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+                });
+                setSolicitudes(res.data);
+            } catch (err) {
+                console.error("Error al cargar solicitudes:", err);
+            } finally {
+                setCargando(false);
+            }
+        };
+        cargarDatos();
+    }, []);
+
+    // 2. FUNCIÃN PARA APROBAR (Crea usuario y envía correo)
+    const aprobar = async (id) => {
+        if (window.confirm("¿Deseas convertir a este postulante en docente oficial?")) {
+            try {
+                const res = await axios.post(
+                    `/api/admin/aprobar-docente/${id}/`,
+                    {},
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem('access_token')}`
+                        }
+                    }
+                );
+
+                // Mostrar credenciales al admin
+                const { mensaje, password } = res.data;
+                alert(
+                    `${mensaje}\n\n` +
+                    `Correo: ${solicitudes.find(s => s.id === id)?.email}\n` +
+                    `Contraseña temporal: ${password}\n\n` +
+                    `Comparte estas credenciales con el docente.`
+                );
+
+                // Quitar de la lista
+                setSolicitudes(prev => prev.filter(sol => sol.id !== id));
+
+            } catch (err) {
+                console.error("Error al aprobar:", err);
+                alert("Hubo un fallo al aprobar al docente.");
+            }
+        }
+    };
+
+    // 3. FUNCIÃN PARA RECHAZAR (Elimina y notifica al docente)
+    const rechazar = async (id) => {
+        if (window.confirm("¿Estás seguro de rechazar esta solicitud? Se enviará un correo de notificación.")) {
+            try {
+                // Asumiendo que creamos la ruta /api/admin/rechazar-docente en el index.js
+                const res = await axios.post(`/api/admin/rechazar-docente/${id}/`, {}, {
+                    headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` }
+                });
+                alert(res.data.mensaje);
+
+                setSolicitudes(prev => prev.filter(sol => sol.id !== id));
+            } catch (err) {
+                console.error("Error al rechazar:", err);
+                alert("No se pudo procesar el rechazo.");
+            }
+        }
+    };
+
+const verMas = (solicitud) => {
+    setSolicitudSeleccionada(solicitud);
+    setModalAbierto(true);
+};
+
+    if (cargando) return <p style={{ color: '#00e5ff', padding: '20px' }}>Consultando base de datos de NEXUS...</p>;
+    
+
+    return (
+    <>
+        <div className="na-table-container na-fade-in">
+
+            <div
+                className="na-section-header"
+                style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '20px'
+                }}
+            >
+                <h3
+                    className="na-section-title"
+                    style={{ margin: 0, color: '#fff' }}
+                >
+                    Bandeja de Entrada de Postulaciones
+                </h3>
+
+                <span className="na-badge-pending">
+                    {solicitudes.length} Pendientes
+                </span>
+            </div>
+
+            <div className="na-table-wrapper">
+
+                <table className="na-table">
+
+                    <thead>
+                        <tr>
+                            <th className="na-th">Nombre del Postulante</th>
+                            <th className="na-th">Especialidad</th>
+                            <th className="na-th">Correo Electrónico</th>
+                            <th className="na-th">Acciones</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {solicitudes.length > 0 ? (
+
+                            solicitudes.map((sol) => (
+
+                                <tr
+                                    key={sol.id}
+                                    className="na-table-row"
+                                >
+
+                                    <td className="na-td">
+                                        {sol.nombre_completo}
+                                    </td>
+
+                                    <td className="na-td">
+                                        <span className="na-specialty-tag">
+                                            {sol.especialidad}
+                                        </span>
+                                    </td>
+
+                                    <td className="na-td">
+                                        {sol.email}
+                                    </td>
+
+                                    <td className="na-td">
+
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                gap: '8px'
+                                            }}
+                                        >
+
+                                            <button
+                                                onClick={() => aprobar(sol.id)}
+                                                className="na-btn-approve"
+                                            >
+                                                Aprobar
+                                            </button>
+
+                                            <button
+                                                onClick={() => rechazar(sol.id)}
+                                                className="na-btn-reject"
+                                            >
+                                                Rechazar
+                                            </button>
+
+                                            <button
+                                                onClick={() => verMas(sol)}
+                                                className="na-btn-view"
+                                            >
+                                                Ver más
+                                            </button>
+
+                                        </div>
+
+                                    </td>
+
+                                </tr>
+
+                            ))
+
+                        ) : (
+
+                            <tr>
+                                <td
+                                    colSpan="4"
+                                    className="na-empty-msg"
+                                >
+                                    No hay solicitudes nuevas por el momento.
+                                </td>
+                            </tr>
+
+                        )}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </div>
+
+        {/* MODAL */}
+
+        {modalAbierto && solicitudSeleccionada && (
+
+            <div
+                className="na-modal-overlay"
+                onClick={() => setModalAbierto(false)}
+            >
+
+                <div
+                    className="na-modal"
+                    onClick={(e) => e.stopPropagation()}
+                >
+
+                    <div className="na-modal-header">
+
+                        <h2>Perfil del Postulante</h2>
+
+                        <button
+                            className="na-close-btn"
+                            onClick={() => setModalAbierto(false)}
+                        >
+                            â
+                        </button>
+
+                    </div>
+
+                    <div className="na-modal-content">
+
+                        <div className="na-info-group">
+                            <label>Nombre completo</label>
+
+                            <p>
+                                {solicitudSeleccionada.nombre_completo}
+                            </p>
+                        </div>
+
+                        <div className="na-info-group">
+                            <label>Correo electrónico</label>
+
+                            <p>
+                                {solicitudSeleccionada.email}
+                            </p>
+                        </div>
+
+                        <div className="na-info-group">
+                            <label>Especialidad</label>
+
+                            <p>
+                                {solicitudSeleccionada.especialidad}
+                            </p>
+                        </div>
+
+                        <div className="na-info-group">
+
+                            <label>Certificación</label>
+
+                            <button
+                                className="na-btn-link"
+                                onClick={() =>
+                                    window.open(
+                                        solicitudSeleccionada.link_certificacion,
+                                        '_blank'
+                                    )
+                                }
+                            >
+                                Ver certificación
+                            </button>
+
+                        </div>
+
+                        <div className="na-info-group">
+
+                            <label>Mensaje de motivación</label>
+
+                            <div className="na-message-box">
+                                {solicitudSeleccionada.mensaje_motivacion}
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        )}
+    </>
+);
+};
+
+// --- ESTILOS PARA MANTENER LA ESTÃTICA NEXUS ---
+const styles = {
+    container: { marginTop: '20px', animation: 'fadeIn 0.5s ease-in' },
+    header: { display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' },
+    badge: { backgroundColor: '#f1c40f', color: '#000', padding: '2px 10px', borderRadius: '12px', fontSize: '12px', fontWeight: 'bold' },
+    table: { width: '100%', borderCollapse: 'collapse', backgroundColor: '#161b22', borderRadius: '8px', overflow: 'hidden' },
+    tableHeader: { backgroundColor: '#21262d', color: '#8b949e', textAlign: 'left' },
+    th: { padding: '15px' },
+    tr: { borderBottom: '1px solid #30363d' },
+    td: { padding: '15px', color: '#c9d1d9' },
+    especialidadTag: { backgroundColor: '#00e5ff22', color: '#00e5ff', padding: '4px 8px', borderRadius: '4px', fontSize: '13px' },
+    noData: { padding: '40px', textAlign: 'center', color: '#8b949e' }
+};
+
+export default AdminSolicitudes;

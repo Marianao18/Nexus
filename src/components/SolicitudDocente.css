@@ -1,0 +1,159 @@
+.solicitud-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 80px 20px;
+    background-color: transparent; /* Permite ver el fondo de App.js */
+    position: relative;
+}
+
+.solicitud-card {
+    background: rgba(17, 25, 40, 0.75); /* Fondo más profundo y translúcido */
+    backdrop-filter: blur(16px) saturate(180%);
+    padding: 50px;
+    border-radius: 24px; /* Bordes más redondeados y modernos */
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    width: 100%;
+    max-width: 550px;
+    color: white;
+    animation: fadeIn 0.6s ease-out;
+}
+
+.solicitud-card h2 {
+    text-align: center;
+    font-size: 2rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    background: linear-gradient(to right, #ffffff, #a5f3fc);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.solicitud-subtitle {
+    text-align: center;
+    font-size: 1rem;
+    margin-bottom: 40px;
+    color: #94a3b8;
+    line-height: 1.5;
+}
+
+.solicitud-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Más espacio entre campos */
+}
+
+/* Estilo para los inputs */
+.solicitud-input, .solicitud-textarea {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 8px;
+    background-color: #1a2230 !important; 
+    border: 1px solid #30363d;
+    color: #ffffff; 
+    font-size: 15px;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.solicitud-input::placeholder, .solicitud-textarea::placeholder {
+    color: #636c7a; 
+}
+
+.solicitud-input:focus, .solicitud-textarea:focus {
+    border-color: #00e5ff;
+    background-color: rgba(15, 23, 42, 0.8);
+    box-shadow: 0 0 0 4px rgba(0, 229, 255, 0.15);
+    transform: translateY(-1px);
+}
+
+/* Personalización del botón */
+.btn-enviar {
+    background: linear-gradient(135deg, #00e5ff 0%, #00b8cc 100%);
+    color: #000000;
+    padding: 14px;
+    border: none;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 16px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    margin-top: 10px;
+    box-shadow: 0 10px 20px -10px rgba(0, 229, 255, 0.5);
+    background-color: #38bdf8;
+}
+
+.btn-enviar:hover:not(:disabled) {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 25px -5px rgba(0, 229, 255, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-enviar:active {
+    transform: translateY(0);
+}
+
+/* Contenedor del Título tipo NEXUS ID */
+.brand-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.nexus-brand {
+    font-size: 2.5rem;
+    font-weight: 900;
+    letter-spacing: -1.5px;
+    color: #ffffff;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    text-transform: uppercase;
+}
+
+.nexus-brand span {
+    color: #00e5ff; /* El color Cyan de Nexus ID */
+}
+
+.solicitud-subtitle-branding {
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 4px; /* Espaciado amplio como en image_cbe663.jpg */
+    color: #8b949e;
+    text-transform: uppercase;
+    margin-top: -5px;
+}
+
+.solicitud-description {
+    text-align: center;
+    color: #94a3b8;
+    font-size: 14px;
+    margin-bottom: 30px;
+}
+
+.input-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 15px;
+    text-align: left; /* Alineado a la izquierda como en la imagen */
+}
+
+/* Estilo para los Labels (Si decides agregarlos arriba del input) */
+.input-label {
+    font-size: 13px;
+    font-weight: 700;
+    color: #f0f6fc;
+    text-transform: uppercase; /* Siempre en mayúsculas */
+    letter-spacing: 0.5px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

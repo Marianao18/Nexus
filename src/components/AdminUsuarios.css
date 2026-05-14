@@ -1,0 +1,25 @@
+.na-btn-delete{
+    background: rgba(248, 81, 73, 0.12);
+    color: #f85149;
+
+    border: 1px solid rgba(248, 81, 73, 0.4);
+
+    padding: 6px 14px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-weight: bold;
+
+    transition: all 0.3s ease;
+}
+
+.na-btn-delete:hover{
+    background: #f85149;
+    color: #fff;
+
+    transform: translateY(-2px);
+
+    box-shadow: 0 0 12px rgba(248,81,73,0.5);
+}

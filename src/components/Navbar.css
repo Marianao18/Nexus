@@ -1,0 +1,100 @@
+/* Usa el nombre exacto que tienes en tu archivo JS */
+.nav {
+    height: 120px !important; 
+    min-height: 120px !important;
+    padding: 0 60px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: #060b13 !important;
+    z-index: 1000 !important;
+}
+
+/* Sección del Logo */
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    text-decoration: none;
+}
+
+.logoText {
+    color: white;
+    font-size: 2.8rem; 
+    font-weight: 800;
+}
+
+.logoText span {
+    color: #00e5ff;
+}
+
+/* Enlaces de Navegación Centrales */
+.links {
+    display: flex;
+    gap: 60px;
+    list-style: none;
+}
+
+.links a {
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    font-size: 1.1rem; /* Texto de links más grande */
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: color 0.3s ease;
+}
+
+.links a:hover {
+    color: #00e5ff;
+}
+
+/* Botón de Acción (Cerrar / Iniciar Sesión) */
+.cta {
+    background: transparent;
+    color: #00e5ff !important;
+    border: 2px solid #00e5ff; /* Borde más grueso */
+    padding: 16px 35px; /* Botón más robusto */
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1.1rem;
+    border: 2px solid #00e5ff;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.cta:hover {
+    background: rgba(0, 229, 255, 0.1);
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
+    transform: translateY(-2px);
+}
+
+/* Contenedor de usuario (Admin) */
+.userContainer {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+}
+
+.userInfo {
+    display: flex;
+    flex-direction: column;
+    text-align: right;
+}
+
+.userGreet {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.userLabel {
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+}
