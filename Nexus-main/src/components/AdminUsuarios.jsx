@@ -35,7 +35,7 @@ const AdminUsuarios = () => {
     try {
 
         await axios.delete(
-            `http://localhost:8000/api/usuarios/admin/eliminar-usuario/${id}/`,
+            `/api/usuarios/admin/eliminar-usuario/${id}/`,
             authHeaders()
         );
 

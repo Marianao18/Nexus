@@ -57,7 +57,7 @@ import React, { useState } from 'react';
             setCargando(true);
 
             try {
-                const respuesta = await axios.post('http://localhost:8000/api/usuarios/registrar-estudiante/', {
+                const respuesta = await axios.post('/api/usuarios/registrar-estudiante/', {
                     nombre: nombre.trim(),
                     email: email.trim().toLowerCase(),
                     password: password

@@ -1,18 +1,39 @@
-node_modules
+# ============================================================
+#  .gitignore reforzado  ->  reemplaza/complementa el de la raiz
+# ============================================================
 
-# Entorno Virtual
+# Dependencias
+node_modules/
 venv/
 env/
 ENV/
 
-# Archivos de configuración sensible (¡Súper importante!)
+# Secretos (NUNCA subir)
 .env
+*.env
+!.env.example
+server/.env
 
-# Archivos compilados de Python
+# Python
 *.pyc
 __pycache__/
 db.sqlite3
 
-# Archivos del sistema y de VS Code
+# Terraform (estado y archivos locales sensibles)
+infra/.terraform/
+infra/*.tfstate
+infra/*.tfstate.backup
+infra/tfplan
+infra/*.tfvars
+!infra/*.tfvars.example
+
+# Build de React
+build/
+Nexus-main/build/
+
+# Empaquetado de despliegue
+nexus-app.zip
+
+# Sistema / editor
 .vscode/
 .DS_Store

@@ -1,0 +1,57 @@
+# ============================================================
+#  docker-compose.yml  ->  va en la RAIZ del repo
+#  Elastic Beanstalk (plataforma Docker) lee este archivo
+#  y levanta TRES contenedores: frontend (nginx) + backend (django) + db (postgres)
+#
+#  Opcion "barata y simple": la base de datos corre como un
+#  contenedor mas, en el mismo servidor. Sin costo extra.
+# ============================================================
+version: "3.8"
+
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      # Volumen persistente: los datos sobreviven a reinicios del contenedor
+      - nexus_pgdata:/var/lib/postgresql/data
+    restart: always
+
+  backend:
+    build:
+      context: ./nexus-backend
+      dockerfile: Dockerfile
+    expose:
+      - "8000"
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      DEBUG: ${DEBUG}
+      DB_NAME: ${DB_NAME}
+      DB_USER: ${DB_USER}
+      DB_PASSWORD: ${DB_PASSWORD}
+      # Ahora la BD es el servicio 'db', no 'localhost'
+      DB_HOST: db
+      DB_PORT: 5432
+      EMAIL_HOST_USER: ${EMAIL_HOST_USER}
+      EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    depends_on:
+      - db
+    restart: always
+
+  frontend:
+    build:
+      context: ./Nexus-main
+      dockerfile: Dockerfile
+    ports:
+      # EB siempre expone la app en el puerto 80 del host
+      - "80:80"
+    depends_on:
+      - backend
+    restart: always
+
+volumes:
+  nexus_pgdata:

@@ -26,7 +26,7 @@ const CambiarPassword = () => {
 
         try {
             const token = localStorage.getItem('access_token');
-            const res = await axios.post('http://localhost:8000/api/usuarios/cambiar-password-obligatorio/', 
+            const res = await axios.post('/api/usuarios/cambiar-password-obligatorio/', 
                 { nueva_password: nuevaPassword },
                 { headers: { Authorization: `Bearer ${token}` } }
             );

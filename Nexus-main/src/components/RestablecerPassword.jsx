@@ -25,7 +25,7 @@ const RestablecerPassword = () => {
         setCargando(true);
 
         try {
-            const res = await axios.post('http://localhost:8000/api/confirmar-password/', {
+            const res = await axios.post('/api/confirmar-password/', {
                 uid: uid,
                 token: token,
                 new_password: password

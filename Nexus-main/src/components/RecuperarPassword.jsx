@@ -19,7 +19,7 @@ const RecuperarPassword = () => {
 
         try {
             // Ajustamos a la URL de tu backend
-            await axios.post('http://localhost:8000/api/password-reset/', { 
+            await axios.post('/api/password-reset/', { 
                 email: email.trim().toLowerCase() 
             });
             
