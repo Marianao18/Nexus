@@ -10,19 +10,31 @@ pipeline {
     // ---- Variables de entorno del pipeline ----
     environment {
         AWS_REGION = 'us-east-1'
-        EB_BUCKET = 'nexus-eb-deploys-619891987841'
+        EB_BUCKET  = 'nexus-eb-deploys-619891987841'
 
         // Credenciales guardadas en Jenkins (Manage Jenkins -> Credentials).
         // NUNCA van escritas aqui en texto plano.
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
 
-        // Secretos de la app -> Terraform los lee como TF_VAR_*
+        // Secretos de la app. Se usan de dos formas:
+        //  - Terraform los lee como TF_VAR_*
+        //  - docker compose los lee con los nombres que espera la app
         TF_VAR_secret_key          = credentials('nexus-secret-key')
         TF_VAR_db_password         = credentials('nexus-db-password')
         TF_VAR_email_host_user     = credentials('nexus-email-user')
         TF_VAR_email_host_password = credentials('nexus-email-password')
         TF_VAR_anthropic_api_key   = credentials('nexus-anthropic-key')
+
+        // Mismos secretos con los nombres que espera docker-compose.yml / Django
+        SECRET_KEY          = credentials('nexus-secret-key')
+        DB_PASSWORD         = credentials('nexus-db-password')
+        EMAIL_HOST_USER     = credentials('nexus-email-user')
+        EMAIL_HOST_PASSWORD = credentials('nexus-email-password')
+        ANTHROPIC_API_KEY   = credentials('nexus-anthropic-key')
+        DB_NAME             = 'nexus_db'
+        DB_USER             = 'nexus_user'
+        DEBUG               = 'False'
     }
 
     stages {
@@ -43,12 +55,13 @@ pipeline {
             }
         }
 
-        // ---- 3. TEST: validaciones rapidas ----
+        // ---- 3. TEST: validacion rapida de Django ----
+        //      Corre 'check' con las variables de entorno ya disponibles.
+        //      No necesita base de datos para validar la configuracion.
         stage('Test') {
             steps {
                 echo 'Validando configuracion de Django...'
-                // 'check' valida que el proyecto no tenga errores graves
-                sh 'docker compose run --rm backend python manage.py check'
+                sh 'docker compose run --rm -e SECRET_KEY -e DB_NAME -e DB_USER -e DB_PASSWORD -e DB_HOST=db -e DB_PORT=5432 -e DEBUG -e EMAIL_HOST_USER -e EMAIL_HOST_PASSWORD -e ANTHROPIC_API_KEY backend python manage.py check'
             }
         }
 
@@ -101,6 +114,10 @@ pipeline {
 
     // ---- Que hacer al terminar (exito o fallo) ----
     post {
+        always {
+            echo 'Limpiando contenedores de prueba...'
+            sh 'docker compose down --remove-orphans || true'
+        }
         success {
             echo 'Pipeline completado. Los cambios ya estan en la nube.'
         }
