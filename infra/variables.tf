@@ -15,7 +15,7 @@ variable "solution_stack" {
   type        = string
   # Verifica el nombre exacto vigente con:
   #   aws elasticbeanstalk list-available-solution-stacks --query "SolutionStacks" --output text | grep -i docker
-  default     = "64bit Amazon Linux 2023 v4.6.4 running Docker"
+  default     = "64bit Amazon Linux 2023 v4.13.0 running Docker"
 }
 
 # ---- Base de datos ----
