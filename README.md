@@ -1,5 +1,5 @@
 # NEXUS — Beyond Control
-### Plataforma Educativa en TI · Medellín, Colombia · 2026
+### Plataforma Educativa en TI · Medellín, Colombia · 2026 - prueba aws
 
 ![NEXUS](https://img.shields.io/badge/NEXUS-Beyond%20Control-00E5FF?style=for-the-badge&logoColor=white)
 ![Django](https://img.shields.io/badge/Django-4.2-092E20?style=for-the-badge&logo=django&logoColor=white)
