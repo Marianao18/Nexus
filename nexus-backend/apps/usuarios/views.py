@@ -16,7 +16,7 @@ class RegistroView(APIView):
         if serializer.is_valid():
             usuario = serializer.save()
             return Response(
-                {"mensaje": "Cuenta creada con ÃÂ©xito.", "email": usuario.email},
+                {"mensaje": "Cuenta creada con éxito.", "email": usuario.email},
                 status=status.HTTP_201_CREATED
             )
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -76,13 +76,13 @@ class LogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             return Response(
-                {"mensaje": "SesiÃÂ³n cerrada correctamente."},
+                {"mensaje": "Sesión cerrada correctamente."},
                 status=status.HTTP_200_OK
             )
         except TokenError:
-            # Token ya expirado o invÃÂ¡lido Ã¢ÂÂ igual limpiamos la sesiÃÂ³n
+            # Token ya expirado o inválido → igual limpiamos la sesión
             return Response(
-                {"mensaje": "SesiÃÂ³n cerrada."},
+                {"mensaje": "Sesión cerrada."},
                 status=status.HTTP_200_OK
             )
 
@@ -165,10 +165,10 @@ class RegistroEstudianteView(APIView):
         email = request.data.get('email')
         password = request.data.get('password')
 
-        # ValidaciÃÂ³n bÃÂ¡sica
+        # Validaciones básicas
         if not email or not password:
             return Response(
-                {"error": "Email y contraseÃÂ±a son obligatorios"}, 
+                {"error": "Email y contraseña son obligatorios"}, 
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -187,7 +187,7 @@ class RegistroEstudianteView(APIView):
                 rol='estudiante'
             )
             return Response(
-                {"mensaje": "Estudiante creado con ÃÂ©xito"}, 
+                {"mensaje": "Estudiante creado con éxito"}, 
                 status=status.HTTP_201_CREATED
             )
         except Exception as e:
@@ -206,7 +206,7 @@ class CambiarPasswordObligatorioView(APIView):
         
         if nueva_password:
             usuario.set_password(nueva_password)
-            # Si usas el campo de cambio obligatorio, aquÃÂ­ lo desactivamos
+            # Si usas el campo de cambio obligatorio, aquí lo desactivamos
             # usuario.debe_cambiar_password = False 
             usuario.save()
             return Response({"mensaje": "Password actualizado"}, status=status.HTTP_200_OK)
@@ -223,15 +223,15 @@ class CambiarPasswordPerfilView(APIView):
         password_actual = request.data.get('password_actual')
         nueva_password = request.data.get('nueva_password')
 
-        # 1. Validar que la contraseÃÂ±a actual sea correcta
+        # 1. Validar que la contraseña actual sea correcta
         if not user.check_password(password_actual):
-            return Response({'error': 'La contraseÃÂ±a actual es incorrecta.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'La contraseña actual es incorrecta.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # 2. Cambiar la contraseÃÂ±a
+        # 2. Cambiar la contraseña
         user.set_password(nueva_password)
         user.save()
         
-        return Response({'mensaje': 'ContraseÃÂ±a actualizada correctamente.'}, status=status.HTTP_200_OK)
+        return Response({'mensaje': 'Contraseña actualizada correctamente.'}, status=status.HTTP_200_OK)
     
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -257,7 +257,7 @@ class EliminarUsuarioView(APIView):
         try:
             usuario = Usuario.objects.get(id=id)
 
-            # Evitar que el admin se elimine a sÃÂ­ mismo
+            # Evitar que el admin se elimine a así­ mismo
             if usuario.id == request.user.id:
                 return Response(
                     {'error': 'No puedes eliminar tu propia cuenta'},
