@@ -65,7 +65,7 @@ const Login = () => {
             <div className="login-card">
                 <header className="login-header">
                     <h2 className="login-title">NEXUS <span>ID</span></h2>
-                    <p className="login-subtitle"> Iniciar sesión</p>
+                    <p className="login-subtitle"> Iniciar sesión prueba 1</p>
                 </header>
 
                 <form onSubmit={manejarLogin} className="login-form">
