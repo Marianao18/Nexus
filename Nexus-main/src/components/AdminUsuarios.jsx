@@ -83,7 +83,7 @@ const AdminUsuarios = () => {
                         Gestión de Usuarios
                     </h2>
                     <p style={{ margin:'4px 0 0', color:'#7A8BA8', fontSize:'13px' }}>
-                        {data.estudiantes.length} estudiantes Â· {data.docentes.length} docentes
+                        {data.estudiantes.length} estudiantes · {data.docentes.length} docentes
                     </p>
                 </div>
             </div>
@@ -105,7 +105,7 @@ const AdminUsuarios = () => {
 
             {error && (
                 <div style={{ color:'#f87171', padding:'16px', background:'rgba(248,113,113,0.1)', borderRadius:'8px' }}>
-                    â ï¸ {error}
+                     {error}
                 </div>
             )}
 

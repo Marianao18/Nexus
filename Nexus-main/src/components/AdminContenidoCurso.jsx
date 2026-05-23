@@ -123,7 +123,7 @@ export default function AdminContenidoCurso() {
     if (error) return (
         <div style={{ display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', minHeight:'100vh', color:'#f87171', background:'#060B14', gap:'16px' }}>
             <p>{error}</p>
-            <button onClick={() => navigate('/admin-dashboard')} style={btnSecStyle}>â Volver al panel</button>
+            <button onClick={() => navigate('/admin-dashboard')} style={btnSecStyle}> ✎ Volver al panel</button>
         </div>
     );
 
@@ -134,13 +134,13 @@ export default function AdminContenidoCurso() {
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'28px' }}>
                 <div>
                     <button onClick={() => navigate('/admin-dashboard')} style={btnSecStyle}>
-                        â Volver al panel
+                        ✎ Volver al panel
                     </button>
                     <h1 style={{ fontSize:'28px', fontWeight:'800', marginTop:'10px', letterSpacing:'-0.02em' }}>
                         {curso?.nombre}
                     </h1>
                     <p style={{ color:'#7A8BA8', fontSize:'13px', marginTop:'4px' }}>
-                        Gestión de contenido Â· Solo visible para administradores
+                        Gestión de contenido · Solo visible para administradores
                     </p>
                 </div>
                 {moduloActivo && (
@@ -148,7 +148,7 @@ export default function AdminContenidoCurso() {
                         onClick={() => { setMostrarFormLec(!mostrarFormLec); setMsg(''); }}
                         style={mostrarFormLec ? btnSecStyle : btnPrimStyle}
                     >
-                        {mostrarFormLec ? 'â Cancelar' : '+ Agregar lección'}
+                        {mostrarFormLec ? '✎ Cancelar' : '+ Agregar lección'}
                     </button>
                 )}
             </div>
@@ -244,7 +244,7 @@ export default function AdminContenidoCurso() {
                             <button
                                 onClick={() => eliminarModulo(m.id)}
                                 style={{ background:'transparent', border:'none', cursor:'pointer', color:'#f87171', fontSize:'14px', padding:'2px 6px' }}
-                            >â</button>
+                            >✎</button>
                         </div>
                     ))}
                 </div>
@@ -292,7 +292,7 @@ export default function AdminContenidoCurso() {
                                             onClick={() => eliminarLeccion(leccionActiva.id)}
                                             style={{ background:'transparent', border:'1px solid rgba(248,113,113,0.3)', borderRadius:'6px', padding:'5px 12px', color:'#f87171', fontSize:'12px', cursor:'pointer', fontFamily:'inherit' }}
                                         >
-                                            Eliminar lección
+                                            ✎ Eliminar lección
                                         </button>
                                     </div>
 
@@ -334,7 +334,7 @@ export default function AdminContenidoCurso() {
     );
 }
 
-// ââ ESTILOS âââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââââ
+//  ESTILOS 
 const cardStyle = {
     background: 'rgba(13,21,37,0.95)',
     border: '1px solid rgba(0,229,255,0.12)',

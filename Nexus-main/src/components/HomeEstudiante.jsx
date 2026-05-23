@@ -414,7 +414,7 @@ const SectionRutas = () => {
                         <div key={ruta.id} className="est-ruta-card" style={{borderLeft:`4px solid ${ruta.color}`}}>
                             <h4>{ruta.nombre}</h4>
                             <p style={{color:'var(--est-muted)',fontSize:'13px',margin:'6px 0'}}>{ruta.descripcion}</p>
-                            <p>Duración: {ruta.duracion} Â· {ruta.num_cursos} cursos</p>
+                            <p>Duración: {ruta.duracion} · {ruta.num_cursos} cursos</p>
                             <div className="est-progress-bar-wrap" style={{margin:'12px 0 6px'}}>
                                 <div className="est-progress-bar" style={{width:`${ruta.progreso}%`, background: ruta.color}} />
                             </div>
@@ -455,7 +455,7 @@ const SectionProgreso = () => {
                         <div key={i}>
                             <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
                                 <span style={{fontSize:'13px',color:'var(--est-text)'}}>{curso.curso}</span>
-                                <span style={{fontSize:'13px',color:curso.color}}>{curso.progreso}% Â· {curso.completados}/{curso.total} módulos</span>
+                                <span style={{fontSize:'13px',color:curso.color}}>{curso.progreso}% · {curso.completados}/{curso.total} módulos</span>
                             </div>
                             <div className="est-progress-bar-wrap">
                                 <div className="est-progress-bar" style={{width:`${curso.progreso}%`,background:curso.color}} />

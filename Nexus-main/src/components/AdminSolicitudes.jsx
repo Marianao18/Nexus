@@ -229,7 +229,7 @@ const verMas = (solicitud) => {
                             className="na-close-btn"
                             onClick={() => setModalAbierto(false)}
                         >
-                            â
+                            ✎
                         </button>
 
                     </div>
