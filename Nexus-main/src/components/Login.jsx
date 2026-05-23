@@ -65,12 +65,12 @@ const Login = () => {
             <div className="login-card">
                 <header className="login-header">
                     <h2 className="login-title">NEXUS <span>ID</span></h2>
-                    <p className="login-subtitle"> Iniciar sesión prueba 1</p>
+                    <p className="login-subtitle"> Iniciar sesión</p>
                 </header>
 
                 <form onSubmit={manejarLogin} className="login-form">
                     <div className="login-input-group">
-                        <label className="login-label">Correo Institucional</label>
+                        <label className="login-label">Correo Institucionallllll</label>
                         <input
                             type="email"
                             placeholder="usuario@nexus.com"
