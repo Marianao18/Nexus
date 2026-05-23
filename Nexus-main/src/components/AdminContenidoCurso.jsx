@@ -153,7 +153,7 @@ export default function AdminContenidoCurso() {
                 )}
             </div>
 
-            {/* FORMULARIO NUEVA LECCIÃN */}
+            {/* FORMULARIO NUEVA LECCIÓN */}
             {mostrarFormLec && moduloActivo && (
                 <div style={{ ...cardStyle, marginBottom:'24px', borderColor:'rgba(0,229,255,0.3)' }}>
                     <h3 style={{ fontSize:'15px', fontWeight:'700', marginBottom:'16px', color:'#00E5FF' }}>
@@ -202,7 +202,7 @@ export default function AdminContenidoCurso() {
             {/* GRID PRINCIPAL */}
             <div style={{ display:'grid', gridTemplateColumns:'300px 1fr', gap:'20px' }}>
 
-                {/* SIDEBAR MÃDULOS */}
+                {/* SIDEBAR MÓDULOS */}
                 <div style={cardStyle}>
                     <h3 style={{ color:'#00E5FF', marginBottom:'16px', fontSize:'14px', fontWeight:'700', letterSpacing:'0.08em', textTransform:'uppercase' }}>
                         Módulos

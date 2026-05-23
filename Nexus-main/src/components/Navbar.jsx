@@ -50,13 +50,13 @@ export default function Navbar() {
 
     return (
         <nav className={styles.nav}>
-            {/* --- SECCIÃN LOGO --- */}
+            {/* --- SECCIÓN LOGO --- */}
             <Link to="/" className={styles.logo}>
                 <div className={styles.logoMark}><LogoIcon /></div>
                 <span className={styles.logoText}>NEX<span>U</span>S</span>
             </Link>
 
-            {/* --- ENLACES DE NAVEGACIÃN --- */}
+            {/* --- ENLACES DE NAVEGACIÓN --- */}
             <ul className={styles.links}>
                 {/* 1. Solo para Visitantes (No logueados) */}
                 {!user.role && (
@@ -77,7 +77,7 @@ export default function Navbar() {
                 )}
             </ul>
 
-            {/* --- SECCIÃN DE AUTENTICACIÃN --- */}
+            {/* --- SECCIÓN DE AUTENTICACIÓN --- */}
             <div className={styles.authSection}>
                 {user.name ? (
                     <div className={styles.userContainer}>

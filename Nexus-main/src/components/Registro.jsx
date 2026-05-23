@@ -18,7 +18,7 @@ import React, { useState } from 'react';
         // 2. Lógica de Validaciones
         const validarFormulario = () => {
             // Nombre: Solo letras y espacios
-            const regexNombre = /^[a-zA-ZñÃáéíóúÃÃÃÃÃ\s]+$/;
+            const regexNombre = /^[a-zA-ZñÑáéíóúÁÉÍÓÚüÜ\s]+$/;
             if (!regexNombre.test(nombre.trim())) {
                 return "El nombre no puede contener números ni símbolos.";
             }
