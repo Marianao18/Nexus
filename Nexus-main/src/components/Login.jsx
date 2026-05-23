@@ -70,7 +70,7 @@ const Login = () => {
 
                 <form onSubmit={manejarLogin} className="login-form">
                     <div className="login-input-group">
-                        <label className="login-label">Correo Institucionallllll</label>
+                        <label className="login-label">Correo Instituciona</label>
                         <input
                             type="email"
                             placeholder="usuario@nexus.com"
