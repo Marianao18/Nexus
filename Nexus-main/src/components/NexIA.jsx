@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import styles from './NexIA.module.css';
 
-// ── Chips de sugerencias iniciales ───────────────────────────────────────────
+// ── Chips de sugerencias iniciales 
 const CHIPS_INICIALES = [
     { label: '¿Qué estudio hoy?',   msg: '¿Qué me recomiendas estudiar hoy según mi progreso?' },
     { label: 'Mi progreso',          msg: '¿Cuánto he avanzado en mis cursos?' },

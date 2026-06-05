@@ -222,6 +222,17 @@ export default function HomeDocente() {
     const especialidad = localStorage.getItem('especialidad') || 'Docente NEXUS';
     const initials = nombre.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
+    // Cargar avatar y biografia desde backend al montar el componente
+    // (antes estaba dentro de VistaInicio, lo que causaba que el avatar
+    // solo se cargara estando en la vista "Inicio" y se viera mal al
+    // refrescar en otras vistas).
+    useEffect(() => {
+        axios.get('/api/perfil/', authHeaders()).then(res => {
+            if (res.data.biografia)   setBio(res.data.biografia);
+            if (res.data.foto_perfil) setAvatar(res.data.foto_perfil);
+        }).catch(() => {});
+    }, []);
+
     const cerrarSesion = async () => {
         const ok = await showConfirm('Seras redirigido al inicio de sesion.', {
             type: 'warning', title: 'Cerrar sesion',
@@ -235,20 +246,25 @@ export default function HomeDocente() {
     const handleAvatar = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
-        // Preview inmediato
+        // Preview inmediato (data URL en memoria, mientras sube al servidor)
         const reader = new FileReader();
         reader.onloadend = () => setAvatar(reader.result);
         reader.readAsDataURL(file);
-        // Guardar en backend
+        // Guardar en backend y sincronizar el estado con la URL real
         const formData = new FormData();
         formData.append('foto_perfil', file);
         try {
-            await axios.patch('/api/perfil/', formData, {
+            const res = await axios.patch('/api/perfil/', formData, {
                 headers: {
                     Authorization: `Bearer ${localStorage.getItem('access_token')}`,
                     'Content-Type': 'multipart/form-data',
                 }
             });
+            // Reemplazar el data URL por la URL real del backend para que
+            // al refrescar la pagina veamos exactamente lo mismo que aqui.
+            if (res.data && res.data.foto_perfil) {
+                setAvatar(res.data.foto_perfil);
+            }
         } catch (err) {
             console.error('Error al guardar foto:', err);
         }
@@ -282,14 +298,6 @@ export default function HomeDocente() {
         const [resumen, setResumen] = useState(null);
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState('');
-
-        // Cargar perfil desde backend al montar
-    useEffect(() => {
-        axios.get('/api/perfil/', authHeaders()).then(res => {
-            if (res.data.biografia) setBio(res.data.biografia);
-            if (res.data.foto_perfil) setAvatar(res.data.foto_perfil);
-        }).catch(() => {});
-    }, []);
 
     useEffect(() => {
             axios.get('/api/docente/resumen/', authHeaders())

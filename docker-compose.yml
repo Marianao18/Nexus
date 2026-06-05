@@ -1,11 +1,4 @@
-# ============================================================
-#  docker-compose.yml  ->  va en la RAIZ del repo
-#  Elastic Beanstalk (plataforma Docker) lee este archivo
-#  y levanta TRES contenedores: frontend (nginx) + backend (django) + db (postgres)
-#
-#  Opcion "barata y simple": la base de datos corre como un
-#  contenedor mas, en el mismo servidor. Sin costo extra.
-# ============================================================
+
 version: "3.8"
 
 services:
@@ -38,6 +31,11 @@ services:
       EMAIL_HOST_USER: ${EMAIL_HOST_USER}
       EMAIL_HOST_PASSWORD: ${EMAIL_HOST_PASSWORD}
       ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY}
+    volumes:
+      # Volumen persistente para archivos subidos (fotos de perfil, etc.)
+      # Sin esto, cada redespliegue borra todas las fotos.
+      # MEDIA_ROOT en settings.py = BASE_DIR / 'media' = /app/media
+      - nexus_media:/app/media
     depends_on:
       - db
     restart: always
@@ -55,3 +53,4 @@ services:
 
 volumes:
   nexus_pgdata:
+  nexus_media:

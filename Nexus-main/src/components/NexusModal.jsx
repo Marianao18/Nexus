@@ -139,13 +139,7 @@ export function NexusModal({
   );
 }
 
-// ── Hook: useNexusModal ───────────────────────────────────────────────────────
-/**
- * Hook que provee showAlert y showConfirm + el JSX del modal.
- *
- * const { modalJSX, showAlert, showConfirm } = useNexusModal();
- * return <div>{modalJSX}{...resto}</div>
- */
+
 export function useNexusModal() {
   const [state, setState] = React.useState({ open: false });
 
