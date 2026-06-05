@@ -414,7 +414,7 @@ const SectionRutas = () => {
                         <div key={ruta.id} className="est-ruta-card" style={{borderLeft:`4px solid ${ruta.color}`}}>
                             <h4>{ruta.nombre}</h4>
                             <p style={{color:'var(--est-muted)',fontSize:'13px',margin:'6px 0'}}>{ruta.descripcion}</p>
-                            <p>Duración: {ruta.duracion} · {ruta.num_cursos} cursos</p>
+                            <p>Duración: {ruta.duracion} Â· {ruta.num_cursos} cursos</p>
                             <div className="est-progress-bar-wrap" style={{margin:'12px 0 6px'}}>
                                 <div className="est-progress-bar" style={{width:`${ruta.progreso}%`, background: ruta.color}} />
                             </div>
@@ -455,7 +455,7 @@ const SectionProgreso = () => {
                         <div key={i}>
                             <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
                                 <span style={{fontSize:'13px',color:'var(--est-text)'}}>{curso.curso}</span>
-                                <span style={{fontSize:'13px',color:curso.color}}>{curso.progreso}% · {curso.completados}/{curso.total} módulos</span>
+                                <span style={{fontSize:'13px',color:curso.color}}>{curso.progreso}% Â· {curso.completados}/{curso.total} módulos</span>
                             </div>
                             <div className="est-progress-bar-wrap">
                                 <div className="est-progress-bar" style={{width:`${curso.progreso}%`,background:curso.color}} />
@@ -616,10 +616,10 @@ const AvatarDisplay = ({ avatarId, fotoUrl, initials, size = 40, colorBorder = t
     const border = colorBorder ? `2px solid ${borderColor}` : 'none';
     const shadow = colorBorder && av ? `0 0 10px ${borderColor}40` : 'none';
 
-    if (fotoUrl) return (
-        <img src={fotoUrl} alt="avatar"
-            style={{ width:size, height:size, borderRadius:'50%', objectFit:'cover', border, boxShadow:shadow, flexShrink:0 }} />
-    );
+    // PRIORIDAD: avatar SVG seleccionado > foto subida > iniciales.
+    // (Antes era foto > avatar, lo que causaba que al elegir un avatar SVG
+    //  todavia se intentara cargar la foto vieja y se viera rota si el
+    //  archivo no existia en el servidor).
     if (av) return (
         <div style={{ width:size, height:size, borderRadius:'50%', border, boxShadow:shadow,
             display:'flex', alignItems:'center', justifyContent:'center', overflow:'hidden',
@@ -629,6 +629,10 @@ const AvatarDisplay = ({ avatarId, fotoUrl, initials, size = 40, colorBorder = t
                 {av.svg}
             </div>
         </div>
+    );
+    if (fotoUrl) return (
+        <img src={fotoUrl} alt="avatar"
+            style={{ width:size, height:size, borderRadius:'50%', objectFit:'cover', border, boxShadow:shadow, flexShrink:0 }} />
     );
     return (
         <div style={{ width:size, height:size, borderRadius:'50%', border,
