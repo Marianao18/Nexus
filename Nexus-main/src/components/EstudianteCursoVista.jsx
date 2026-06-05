@@ -13,6 +13,7 @@ export default function EstudianteCursoVista() {
 
     const [curso, setCurso] = useState(null);
     const [modulos, setModulos] = useState([]);
+    const [recursos, setRecursos] = useState([]);
     const [moduloActivo, setModuloActivo] = useState(null);
     const [leccionActiva, setLeccionActiva] = useState(null);
     const [progreso, setProgreso] = useState(0);
@@ -26,6 +27,7 @@ export default function EstudianteCursoVista() {
             const res = await axios.get(`/api/estudiante/cursos/${id}/contenido/`, authHeaders());
             setCurso({ nombre: res.data.curso_nombre, color: res.data.curso_color });
             setModulos(res.data.modulos);
+            setRecursos(res.data.recursos || []);
             setProgreso(res.data.progreso);
             if (res.data.modulos.length > 0) {
                 setModuloActivo(res.data.modulos[0]);
@@ -134,6 +136,56 @@ export default function EstudianteCursoVista() {
                             )}
                         </div>
                     ))}
+
+                    {/* Recursos del curso (archivos de apoyo subidos por el docente) */}
+                    <div style={{ marginTop: '20px', paddingTop: '16px', borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                        <p style={{
+                            fontSize: '11px', fontWeight: '700', color: '#7A8BA8',
+                            letterSpacing: '0.1em', textTransform: 'uppercase',
+                            padding: '8px 12px', marginBottom: '4px',
+                        }}>
+                            Recursos del curso
+                        </p>
+                        {recursos.length === 0 ? (
+                            <p style={{ fontSize: '12px', color: '#7A8BA8', padding: '6px 12px' }}>
+                                Aún no hay archivos de apoyo.
+                            </p>
+                        ) : (
+                            recursos.map(r => (
+                                <a
+                                    key={r.id}
+                                    href={r.url}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: '10px',
+                                        padding: '10px 12px', borderRadius: '8px',
+                                        fontSize: '12px', color: '#EEF2FF',
+                                        textDecoration: 'none', cursor: 'pointer',
+                                        marginBottom: '2px',
+                                        background: 'transparent',
+                                        transition: 'background 0.15s',
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
+                                    onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                    title={`Descargar ${r.nombre}`}
+                                >
+                                    <span style={{
+                                        width: '24px', height: '24px', borderRadius: '5px',
+                                        background: `rgba(${hexToRgb(color)},0.15)`, color,
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                        fontSize: '9px', fontWeight: '800', textTransform: 'uppercase',
+                                        flexShrink: 0,
+                                    }}>
+                                        {r.tipo}
+                                    </span>
+                                    <span style={{ flex: 1, lineHeight: '1.3', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                        {r.nombre}
+                                    </span>
+                                </a>
+                            ))
+                        )}
+                    </div>
                 </div>
             </aside>
 

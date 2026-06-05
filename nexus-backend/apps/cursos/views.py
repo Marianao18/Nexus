@@ -7,7 +7,7 @@ from .serializers import CursoInscripcionSerializer, RutaSerializer
 from apps.usuarios.models import Usuario
 
 
-#  VISTAS EXISTENTES 
+# VISTAS EXISTENTES
 
 class ResumenEstudianteView(APIView):
     permission_classes = [IsAuthenticated]
@@ -48,7 +48,7 @@ class ResumenEstudianteView(APIView):
         ).select_related('leccion__modulo__curso').order_by('-fecha')[:5]
 
         actividad = [{
-            'texto': f'Completaste la lección "{lv.leccion.titulo}" en {lv.leccion.modulo.curso.nombre}',
+            'texto': f'Completaste la lecciÃ³n "{lv.leccion.titulo}" en {lv.leccion.modulo.curso.nombre}',
             'tiempo': f'Hace {timesince(lv.fecha)}',
             'color': lv.leccion.modulo.curso.color,
         } for lv in recientes]
@@ -140,26 +140,26 @@ class CompletarModuloView(APIView):
         try:
             modulo = Modulo.objects.get(id=modulo_id)
         except Modulo.DoesNotExist:
-            return Response({'error': 'Módulo no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'MÃ³dulo no encontrado'}, status=status.HTTP_404_NOT_FOUND)
 
         if not Inscripcion.objects.filter(estudiante=request.user, curso=modulo.curso).exists():
-            return Response({'error': 'No estás inscrito en este curso'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'No estÃ¡s inscrito en este curso'}, status=status.HTTP_403_FORBIDDEN)
 
         mc, creado = ModuloCompletado.objects.get_or_create(
             estudiante=request.user, modulo=modulo
         )
         return Response({
-            'mensaje': 'Módulo completado' if creado else 'Ya estaba completado',
+            'mensaje': 'MÃ³dulo completado' if creado else 'Ya estaba completado',
             'xp_ganado': 100 if creado else 0,
         })
 
 
-# VISTAS NUEVAS 
+#  VISTAS NUEVAS
 
 class CatalogoView(APIView):
     """
     GET /api/cursos/catalogo/
-    Devuelve todos los cursos activos con info de si el estudiante ya está inscrito.
+    Devuelve todos los cursos activos con info de si el estudiante ya estÃ¡ inscrito.
     """
     permission_classes = [IsAuthenticated]
 
@@ -285,8 +285,8 @@ class AdminCursosView(APIView):
 
 class AdminCursoDetalleView(APIView):
     """
-    PATCH  /api/admin/cursos/<id>/  activa o desactiva un curso
-    DELETE /api/admin/cursos/<id>/  elimina un curso
+    PATCH  /api/admin/cursos/<id>/  â activa o desactiva un curso
+    DELETE /api/admin/cursos/<id>/  â elimina un curso
     """
     permission_classes = [IsAuthenticated]
 
@@ -328,7 +328,7 @@ class DocentesListView(APIView):
         return Response(list(docentes))
 
 
-# VISTAS DOCENTE 
+#  VISTAS DOCENTE 
 
 class DocenteCursosView(APIView):
     """
@@ -367,7 +367,7 @@ class DocenteCursosView(APIView):
 class DocenteEstudiantesView(APIView):
     """
     GET /api/docente/cursos/<id>/estudiantes/
-    Estudiantes inscritos en un curso especí­fico del docente.
+    Estudiantes inscritos en un curso especÃ­fico del docente.
     """
     permission_classes = [IsAuthenticated]
 
@@ -413,7 +413,7 @@ class DocenteEstudiantesView(APIView):
 class DocenteResumenView(APIView):
     """
     GET /api/docente/resumen/
-    Métricas generales del docente para el dashboard de inicio.
+    MÃ©tricas generales del docente para el dashboard de inicio.
     """
     permission_classes = [IsAuthenticated]
 
@@ -487,9 +487,9 @@ class RecursosView(APIView):
 
         archivo = request.FILES.get('archivo')
         if not archivo:
-            return Response({'error': 'No se envió ningún archivo.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'No se enviÃ³ ningÃºn archivo.'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Validar extensión
+        # Validar extensiÃ³n
         ext = archivo.name.split('.')[-1].lower()
         tipos_permitidos = {'pdf': 'pdf', 'docx': 'docx', 'xlsx': 'xlsx', 'csv': 'csv'}
         if ext not in tipos_permitidos:
@@ -533,7 +533,8 @@ class RecursoDeleteView(APIView):
         return Response({'mensaje': 'Recurso eliminado correctamente.'})
 
 
-# VISTAS CONTENIDO 
+#  VISTAS CONTENIDO 
+
 def youtube_embed(url):
     """Convierte cualquier URL de YouTube a formato embed."""
     import re
@@ -551,7 +552,7 @@ def youtube_embed(url):
 
 class AdminContenidoCursoView(APIView):
     """
-    GET  /api/admin/cursos/<id>/contenido/  → módulos y lecciones del curso
+    GET  /api/admin/cursos/<id>/contenido/  â mÃ³dulos y lecciones del curso
     """
     permission_classes = [IsAuthenticated]
 
@@ -586,8 +587,8 @@ class AdminContenidoCursoView(APIView):
 
 class AdminModuloView(APIView):
     """
-    POST   /api/admin/cursos/<id>/modulos/        crear módulo
-    DELETE /api/admin/modulos/<modulo_id>/        eliminar módulo
+    POST   /api/admin/cursos/<id>/modulos/        â crear mÃ³dulo
+    DELETE /api/admin/modulos/<modulo_id>/        â eliminar mÃ³dulo
     """
     permission_classes = [IsAuthenticated]
 
@@ -617,14 +618,14 @@ class AdminModuloDetalleView(APIView):
         try:
             modulo = Modulo.objects.get(id=modulo_id)
         except Modulo.DoesNotExist:
-            return Response({'error': 'Módulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'MÃ³dulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         modulo.delete()
-        return Response({'mensaje': 'Módulo eliminado.'})
+        return Response({'mensaje': 'MÃ³dulo eliminado.'})
 
 
 class AdminLeccionView(APIView):
     """
-    POST /api/admin/modulos/<modulo_id>/lecciones/ crear lección con video
+    POST /api/admin/modulos/<modulo_id>/lecciones/  â crear lecciÃ³n con video
     """
     permission_classes = [IsAuthenticated]
 
@@ -634,7 +635,7 @@ class AdminLeccionView(APIView):
         try:
             modulo = Modulo.objects.get(id=modulo_id)
         except Modulo.DoesNotExist:
-            return Response({'error': 'Módulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'MÃ³dulo no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
 
         from .models import Leccion
         titulo    = request.data.get('titulo', '').strip()
@@ -642,7 +643,7 @@ class AdminLeccionView(APIView):
         descripcion = request.data.get('descripcion', '').strip()
 
         if not titulo:
-            return Response({'error': 'El título es obligatorio.'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'error': 'El tÃ­tulo es obligatorio.'}, status=status.HTTP_400_BAD_REQUEST)
 
         orden = modulo.lecciones.count() + 1
         leccion = Leccion.objects.create(
@@ -668,15 +669,15 @@ class AdminLeccionDetalleView(APIView):
         try:
             leccion = Leccion.objects.get(id=leccion_id)
         except Leccion.DoesNotExist:
-            return Response({'error': 'Lección no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'LecciÃ³n no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
         leccion.delete()
-        return Response({'mensaje': 'Lección eliminada.'})
+        return Response({'mensaje': 'LecciÃ³n eliminada.'})
 
 
 class EstudianteCursoContenidoView(APIView):
     """
     GET /api/estudiante/cursos/<id>/contenido/
-    Contenido del curso para el estudiantes, módulos, lecciones y cuáles ha visto.
+    Contenido del curso para el estudiante â mÃ³dulos, lecciones y cuÃ¡les ha visto.
     """
     permission_classes = [IsAuthenticated]
 
@@ -687,7 +688,7 @@ class EstudianteCursoContenidoView(APIView):
         except Curso.DoesNotExist:
             return Response({'error': 'Curso no encontrado.'}, status=status.HTTP_404_NOT_FOUND)
         except Inscripcion.DoesNotExist:
-            return Response({'error': 'No estás inscrito en este curso.'}, status=status.HTTP_403_FORBIDDEN)
+            return Response({'error': 'No estÃ¡s inscrito en este curso.'}, status=status.HTTP_403_FORBIDDEN)
 
         from .models import Leccion, LeccionVista
         lecciones_vistas = set(
@@ -723,18 +724,31 @@ class EstudianteCursoContenidoView(APIView):
 
         progreso = round((total_vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
 
+        # Recursos del curso (archivos de apoyo subidos por el docente)
+        # El estudiante inscrito puede verlos y descargarlos.
+        from .models import Recurso
+        recursos_qs = Recurso.objects.filter(curso=curso)
+        recursos_data = [{
+            'id':     str(r.id),
+            'nombre': r.nombre,
+            'tipo':   r.tipo,
+            'url':    request.build_absolute_uri(r.archivo.url),
+            'fecha':  r.fecha_subida.strftime('%d/%m/%Y'),
+        } for r in recursos_qs]
+
         return Response({
             'curso_nombre': curso.nombre,
             'curso_color':  curso.color,
             'progreso':     progreso,
             'modulos':      modulos_data,
+            'recursos':     recursos_data,
         })
 
 
 class MarcarLeccionVistaView(APIView):
     """
     POST /api/estudiante/lecciones/<id>/vista/
-    Marca una lección como vista por el estudiante.
+    Marca una lecciÃ³n como vista por el estudiante.
     """
     permission_classes = [IsAuthenticated]
 
@@ -743,13 +757,13 @@ class MarcarLeccionVistaView(APIView):
         try:
             leccion = Leccion.objects.get(id=leccion_id)
         except Leccion.DoesNotExist:
-            return Response({'error': 'Lección no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
+            return Response({'error': 'LecciÃ³n no encontrada.'}, status=status.HTTP_404_NOT_FOUND)
 
         lv, creada = LeccionVista.objects.get_or_create(
             estudiante=request.user, leccion=leccion
         )
         return Response({
-            'mensaje': 'Lección marcada como vista.' if creada else 'Ya estaba marcada.',
+            'mensaje': 'LecciÃ³n marcada como vista.' if creada else 'Ya estaba marcada.',
             'xp_ganado': 50 if creada else 0,
         })
 
@@ -763,7 +777,7 @@ class TokenVideoView(APIView):
     def get(self, request, leccion_id):
         from .models import Leccion
 
-        # 1. Verificar que la lección existe
+        # 1. Verificar que la lecciÃ³n existe
         try:
             leccion = Leccion.objects.select_related(
                 'modulo__curso'
@@ -776,7 +790,7 @@ class TokenVideoView(APIView):
 
         curso = leccion.modulo.curso
 
-        # 2. Verificar que el estudiante está¡ inscrito y activo
+        # 2. Verificar que el estudiante estÃ¡ inscrito y activo
         if request.user.rol != 'estudiante':
             return Response(
                 {'error': 'Solo los estudiantes pueden acceder al contenido.'},
@@ -791,14 +805,14 @@ class TokenVideoView(APIView):
 
         if not inscrito:
             return Response(
-                {'error': 'No estás inscrito en este curso.'},
+                {'error': 'No estÃ¡s inscrito en este curso.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        # 3. Verificar que el curso está¡ activo
+        # 3. Verificar que el curso estÃ¡ activo
         if not curso.activo:
             return Response(
-                {'error': 'Este curso no está disponible.'},
+                {'error': 'Este curso no estÃ¡ disponible.'},
                 status=status.HTTP_403_FORBIDDEN
             )
 
@@ -806,11 +820,11 @@ class TokenVideoView(APIView):
         embed_url = youtube_embed(leccion.video_url)
         if not embed_url:
             return Response(
-                {'error': 'Esta lección no tiene video disponible.'},
+                {'error': 'Esta lecciÃ³n no tiene video disponible.'},
                 status=status.HTTP_404_NOT_FOUND
             )
 
-        # Agregar parámetros de seguridad al embed de YouTube
+        # Agregar parÃ¡metros de seguridad al embed de YouTube
         embed_url_seguro = (
                 f"{embed_url}"
                 f"?rel=0"
@@ -832,7 +846,8 @@ class TokenVideoView(APIView):
         })
 
 
-# NEXIA â Asistente IA 
+#  NEXIA  Asistente IA 
+
 class NexIAChatView(APIView):
     """
     POST /api/nexia/chat/
@@ -840,10 +855,10 @@ class NexIAChatView(APIView):
     y consulta Claude (Anthropic) para generar una respuesta personalizada.
 
     Body: {
-        "mensaje": "¿Cuánto llevo en Python?",
-        "historial": [                       # opcional, últimos N turnos
+        "mensaje": "Â¿CuÃ¡nto llevo en Python?",
+        "historial": [                       # opcional, Ãºltimos N turnos
             {"rol": "user",      "texto": "Hola"},
-            {"rol": "assistant", "texto": "¡Hola! Soy NexIA..."}
+            {"rol": "assistant", "texto": "Â¡Hola! Soy NexIA..."}
         ]
     }
     """
@@ -854,7 +869,7 @@ class NexIAChatView(APIView):
         import anthropic
         from .models import LeccionVista, Recurso
 
-        # ââ 1. Validar entrada ââââââââââââââââââââââââââââââââââââââââââââââââ
+        #  1. Validar entrada  1. Validar entrada
         mensaje = request.data.get('mensaje', '').strip()
         historial = request.data.get('historial', [])
 
@@ -866,7 +881,7 @@ class NexIAChatView(APIView):
 
         if len(mensaje) > 1000:
             return Response(
-                {'error': 'El mensaje es demasiado largo (máximo 1000 caracteres).'},
+                {'error': 'El mensaje es demasiado largo (mÃ¡ximo 1000 caracteres).'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -876,15 +891,15 @@ class NexIAChatView(APIView):
         if estudiante.rol not in ('estudiante', 'docente', 'admin'):
             return Response({'error': 'Sin permisos.'}, status=status.HTTP_403_FORBIDDEN)
 
-        # 2. Construir contexto real desde la DB 
+        #  2. Construir contexto real desde la DB  2. Construir contexto real desde la DB
         contexto_usuario = _construir_contexto(estudiante)
 
-        #  3. Armar el system prompt personalizado 
+        #  3. Armar el system prompt personalizado  3. Armar el system prompt personalizado
         system_prompt = _system_prompt(estudiante, contexto_usuario)
 
-        # 4. Convertir historial del frontend al formato Anthropic 
+        #  4. Convertir historial del frontend al formato Anthropic  4. Convertir historial del frontend al formato Anthropic
         messages = []
-        for turno in historial[-10:]:   # máximo últimos 10 turnos
+        for turno in historial[-10:]:   # mÃ¡ximo Ãºltimos 10 turnos
             rol_api = 'user' if turno.get('rol') == 'user' else 'assistant'
             texto   = str(turno.get('texto', '')).strip()
             if texto:
@@ -896,18 +911,18 @@ class NexIAChatView(APIView):
         # Anthropic exige alternancia estricta user/assistant
         messages = _limpiar_historial(messages)
 
-        # 5. Llamar a Claude
+        #  5. Llamar a Claude  5. Llamar a Claude
         api_key = settings.ANTHROPIC_API_KEY
         if not api_key or api_key.startswith('sk-ant-aqui'):
             return Response(
-                {'error': 'NexIA no está configurada aún. Contacta al administrador.'},
+                {'error': 'NexIA no estÃ¡ configurada aÃºn. Contacta al administrador.'},
                 status=status.HTTP_503_SERVICE_UNAVAILABLE
             )
 
         try:
             client = anthropic.Anthropic(api_key=api_key)
             respuesta = client.messages.create(
-                model='claude-haiku-4-5-20251001',   # rápidp y economico para el chat
+                model='claude-haiku-4-5-20251001',   # rÃ¡pido y econÃ³mico para chat
                 max_tokens=600,
                 system=system_prompt,
                 messages=messages,
@@ -921,7 +936,7 @@ class NexIAChatView(APIView):
             )
         except anthropic.RateLimitError:
             return Response(
-                {'error': 'NexIA está recibiendo muchas consultas. Intenta en unos segundos.'},
+                {'error': 'NexIA estÃ¡ recibiendo muchas consultas. Intenta en unos segundos.'},
                 status=status.HTTP_429_TOO_MANY_REQUESTS
             )
         except anthropic.APIError as e:
@@ -933,7 +948,8 @@ class NexIAChatView(APIView):
         return Response({'respuesta': texto_respuesta})
 
 
-#  Helpers privados 
+#  Helpers privados  1. Validar entrada
+
 def _construir_contexto(estudiante):
     """Consulta la DB y devuelve un dict con toda la info del estudiante."""
     from .models import (
@@ -955,14 +971,14 @@ def _construir_contexto(estudiante):
         ).count()
         progreso = round((vistas / total_lecciones) * 100) if total_lecciones > 0 else 0
 
-        # Próxima lección no vista
+        # PrÃ³xima lecciÃ³n no vista
         proxima = None
         for modulo in curso.modulos.all():
             for leccion in modulo.lecciones.all():
                 if not LeccionVista.objects.filter(
                     estudiante=estudiante, leccion=leccion
                 ).exists():
-                    proxima = f'"{leccion.titulo}" (módulo: {modulo.nombre})'
+                    proxima = f'"{leccion.titulo}" (mÃ³dulo: {modulo.nombre})'
                     break
             if proxima:
                 break
@@ -993,7 +1009,7 @@ def _construir_contexto(estudiante):
     elif xp >= 500:  nivel = 2
     else:            nivel = 1
 
-    # Catálogo de cursos disponibles (para recomendar inscripción)
+    # CatÃ¡logo de cursos disponibles (para recomendar inscripciÃ³n)
     catalogo = list(
         Curso.objects.filter(activo=True).values_list('nombre', 'tecnologia')
     )
@@ -1018,21 +1034,21 @@ def _system_prompt(estudiante, ctx):
             f"  â¢ {c['nombre']} ({c['tecnologia']}) â "
             f"{c['progreso']}% completado ({c['vistas']}/{c['total']} lecciones). "
             f"Docente: {c['docente']}. "
-            f"Próxima lección pendiente: {c['proxima']}\n"
+            f"PrÃ³xima lecciÃ³n pendiente: {c['proxima']}\n"
         )
     if not cursos_texto:
-        cursos_texto = '  (El estudiante no tiene cursos inscritos aún)\n'
+        cursos_texto = '  (El estudiante no tiene cursos inscritos aÃºn)\n'
 
-    rutas_texto = ', '.join(ctx['rutas']) if ctx['rutas'] else 'ninguna ruta inscrita aún'
+    rutas_texto = ', '.join(ctx['rutas']) if ctx['rutas'] else 'ninguna ruta inscrita aÃºn'
 
     return f"""Eres NexIA, el asistente de aprendizaje de la plataforma educativa NEXUS.
-NEXUS es una plataforma de formación tecnológica para estudiantes de Medellín, Colombia,
-enfocada en impulsar conocimientos de tecnología de la información (TI).
+NEXUS es una plataforma de formaciÃ³n tecnolÃ³gica para estudiantes de MedellÃ­n, Colombia,
+enfocada en impulsar conocimientos de tecnologÃ­a de la informaciÃ³n (TI).
 
-Estás hablando con: {ctx['nombre']}
+EstÃ¡s hablando con: {ctx['nombre']}
 Rol: estudiante de la plataforma NEXUS.
 
-=== INFORMACIÓN REAL DEL ESTUDIANTE ===
+=== INFORMACIÃN REAL DEL ESTUDIANTE ===
 
 Cursos inscritos y progreso:
 {cursos_texto}
@@ -1040,34 +1056,34 @@ Rutas de aprendizaje inscritas: {rutas_texto}
 
 XP acumulado: {ctx['xp']} puntos | Nivel actual: {ctx['nivel']}/5
 
-Catálogo de cursos disponibles en NEXUS:
+CatÃ¡logo de cursos disponibles en NEXUS:
   {ctx['catalogo']}
 
 === TU PERSONALIDAD Y COMPORTAMIENTO ===
 
-1. Eres cercano, motivador y claro. Hablas en español colombiano informal pero respetuoso.
-   Usas "tú" para dirigirte al estudiante, no "usted".
+1. Eres cercano, motivador y claro. Hablas en espaÃ±ol colombiano informal pero respetuoso.
+   Usas "tÃº" para dirigirte al estudiante, no "usted".
 2. Siempre que sea relevante, usa los datos reales del estudiante para personalizar
-   tu respuesta (su progreso real, su próxima lección pendiente, su nivel de XP).
-3. Si el estudiante tiene dudas técnicas sobre temas de sus cursos (Python, Django,
+   tu respuesta (su progreso real, su prÃ³xima lecciÃ³n pendiente, su nivel de XP).
+3. Si el estudiante tiene dudas tÃ©cnicas sobre temas de sus cursos (Python, Django,
    SQL, Power BI, Excel, Java, etc.), explica de forma clara y con ejemplos breves.
 4. Si el estudiante parece desmotivado o atascado, ofrece apoyo y estrategias concretas.
-5. NO inventes información sobre cursos, docentes o contenidos que no estén en los datos.
-6. NO eres un chatbot de propósito general. Si te preguntan algo completamente ajeno
-   a la plataforma o al aprendizaje de TI, redirige amablemente la conversación.
-7. Mantén respuestas concisas (máximo 4 párrafos). Usa listas cuando sea útil.
-8. Si no sabes algo específico del contenido de un módulo, sé honesto y sugiere
+5. NO inventes informaciÃ³n sobre cursos, docentes o contenidos que no estÃ©n en los datos.
+6. NO eres un chatbot de propÃ³sito general. Si te preguntan algo completamente ajeno
+   a la plataforma o al aprendizaje de TI, redirige amablemente la conversaciÃ³n.
+7. MantÃ©n respuestas concisas (mÃ¡ximo 4 pÃ¡rrafos). Usa listas cuando sea Ãºtil.
+8. Si no sabes algo especÃ­fico del contenido de un mÃ³dulo, sÃ© honesto y sugiere
    que el estudiante consulte con su docente o revise los recursos del curso.
 
-Recuerda: tu objetivo es que {ctx['nombre']} progrese, aprenda y se sienta acompañado
-en su camino de formación tecnológica en NEXUS Medellín.
+Recuerda: tu objetivo es que {ctx['nombre']} progrese, aprenda y se sienta acompaÃ±ado
+en su camino de formaciÃ³n tecnolÃ³gica en NEXUS MedellÃ­n.
 """
 
 
 def _limpiar_historial(messages):
     """
     Anthropic exige que los mensajes alternen estrictamente user/assistant
-    y que el primero y último sean 'user'. Esta función limpia el historial.
+    y que el primero y Ãºltimo sean 'user'. Esta funciÃ³n limpia el historial.
     """
     if not messages:
         return messages
