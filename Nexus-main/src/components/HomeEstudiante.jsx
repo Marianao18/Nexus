@@ -14,7 +14,6 @@ const authHeaders = () => ({
 // --- ICONOS -------------------------------------------------------------------
 const IconHome    = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>;
 const IconBook    = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>;
-const IconMap     = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"/><line x1="8" y1="2" x2="8" y2="18"/><line x1="16" y1="6" x2="16" y2="22"/></svg>;
 const IconChart   = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/><line x1="2" y1="20" x2="22" y2="20"/></svg>;
 const IconUser    = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>;
 const IconLogout  = () => <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>;
@@ -72,7 +71,6 @@ const HomeEstudiante = () => {
         { id: 'inicio',    label: 'Inicio',               icon: <IconHome /> },
         { id: 'explorar',  label: 'Explorar Cursos',      icon: <IconExplore /> },
         { id: 'cursos',    label: 'Mis Cursos',           icon: <IconBook /> },
-        { id: 'rutas',     label: 'Rutas de Aprendizaje', icon: <IconMap /> },
         { id: 'progreso',  label: 'Progreso',             icon: <IconChart /> },
         { id: 'perfil',    label: 'Mi Perfil',            icon: <IconUser /> },
     ];
@@ -141,7 +139,6 @@ const HomeEstudiante = () => {
                     {activeSection === 'inicio' && <SectionInicio userName={userName} initials={initials} avatarId={avatarId} fotoUrl={fotoUrl} setActiveSection={setActiveSection} />}
                     {activeSection === 'explorar' && <SectionExplorar setActiveSection={setActiveSection} />}
                     {activeSection === 'cursos'   && <SectionCursos />}
-                    {activeSection === 'rutas'    && <SectionRutas />}
                     {activeSection === 'progreso' && <SectionProgreso />}
                     {activeSection === 'perfil' && <SectionPerfil userName={userName} userEmail={userEmail} initials={initials} avatarId={avatarId} fotoUrl={fotoUrl} setAvatarId={setAvatarId} setFotoUrl={setFotoUrl} />}
                 </div>
@@ -188,10 +185,6 @@ const SectionInicio = ({ userName, initials, setActiveSection }) => {
                 <div className="est-metric-card green">
                     <IconChart />
                     <div><span className="est-metric-value">{data.progreso_global}%</span><span className="est-metric-label">Progreso general</span></div>
-                </div>
-                <div className="est-metric-card purple" onClick={() => setActiveSection('rutas')} style={{cursor:'pointer'}}>
-                    <IconMap />
-                    <div><span className="est-metric-value">{data.rutas_activas}</span><span className="est-metric-label">Rutas activas</span></div>
                 </div>
                 <div className="est-metric-card orange">
                     <IconStar />
@@ -388,46 +381,9 @@ const SectionCursos = () => {
     );
 };
 
-// --- SECCIÓN: RUTAS -----------------------------------------------------------
-const SectionRutas = () => {
-    const [rutas,   setRutas]   = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [error,   setError]   = useState('');
-
-    useEffect(() => {
-        axios.get('/api/estudiante/rutas/', authHeaders())
-            .then(res => setRutas(res.data))
-            .catch(() => setError('No se pudieron cargar tus rutas.'))
-            .finally(() => setLoading(false));
-    }, []);
-
-    if (loading) return <Loader />;
-    if (error)   return <ErrorMsg msg={error} />;
-
-    return (
-        <div className="est-section-content">
-            {rutas.length === 0 ? (
-                <p style={{color:'var(--est-muted)'}}>No tienes rutas de aprendizaje activas.</p>
-            ) : (
-                <div className="est-rutas-grid">
-                    {rutas.map(ruta => (
-                        <div key={ruta.id} className="est-ruta-card" style={{borderLeft:`4px solid ${ruta.color}`}}>
-                            <h4>{ruta.nombre}</h4>
-                            <p style={{color:'var(--est-muted)',fontSize:'13px',margin:'6px 0'}}>{ruta.descripcion}</p>
-                            <p>Duración: {ruta.duracion} · {ruta.num_cursos} cursos</p>
-                            <div className="est-progress-bar-wrap" style={{margin:'12px 0 6px'}}>
-                                <div className="est-progress-bar" style={{width:`${ruta.progreso}%`, background: ruta.color}} />
-                            </div>
-                            <span style={{color: ruta.color}}>{ruta.progreso}% completado</span>
-                        </div>
-                    ))}
-                </div>
-            )}
-        </div>
-    );
-};
-
 // --- SECCIÓN: PROGRESO --------------------------------------------------------
+// Dashboard de progreso del estudiante. Usa solo los datos que ya devuelve el
+// backend (/api/estudiante/progreso/) y deriva metricas en el frontend.
 const SectionProgreso = () => {
     const [data,    setData]    = useState(null);
     const [loading, setLoading] = useState(true);
@@ -443,27 +399,214 @@ const SectionProgreso = () => {
     if (loading) return <Loader />;
     if (error)   return <ErrorMsg msg={error} />;
 
+    // ─── Metricas derivadas (calculadas en el frontend) ─────────────────────
+    const cursos               = data.detalle_cursos || [];
+    const totalCursos          = cursos.length;
+    const cursosCompletados    = cursos.filter(c => c.progreso === 100).length;
+    const cursosEnProgreso     = cursos.filter(c => c.progreso > 0 && c.progreso < 100).length;
+    const promedioAvance       = totalCursos > 0
+        ? Math.round(cursos.reduce((acc, c) => acc + c.progreso, 0) / totalCursos)
+        : 0;
+
+    // Curso con mayor y menor avance (para el insight motivacional)
+    const cursoLider     = [...cursos].sort((a, b) => b.progreso - a.progreso)[0];
+    const cursoPendiente = [...cursos]
+        .filter(c => c.progreso < 100)
+        .sort((a, b) => a.progreso - b.progreso)[0];
+
+    // Insight motivacional dinamico
+    const generarInsight = () => {
+        if (totalCursos === 0) return { emoji: '🚀', texto: 'Aún no estás inscrito en cursos. ¡Explora el catálogo para empezar!' };
+        if (cursosCompletados === totalCursos) return { emoji: '🏆', texto: `¡Eres un crack! Completaste todos tus cursos.` };
+        if (cursoLider && cursoLider.progreso >= 75 && cursoLider.progreso < 100) {
+            return { emoji: '🔥', texto: `Estás muy cerca de completar "${cursoLider.curso}". ¡Vamos por ese 100%!` };
+        }
+        if (promedioAvance >= 50) return { emoji: '💪', texto: '¡Vas muy bien! Sigue con ese ritmo de aprendizaje.' };
+        if (promedioAvance > 0)   return { emoji: '👏', texto: 'Buen comienzo. Cada lección te acerca a tu meta.' };
+        return { emoji: '✨', texto: 'Empieza tu primera lección y ve tu progreso aquí.' };
+    };
+    const insight = generarInsight();
+
+    // ─── Donut SVG para el promedio global ──────────────────────────────────
+    const DONUT_SIZE   = 160;
+    const DONUT_STROKE = 14;
+    const DONUT_RADIUS = (DONUT_SIZE - DONUT_STROKE) / 2;
+    const DONUT_CIRC   = 2 * Math.PI * DONUT_RADIUS;
+    const donutOffset  = DONUT_CIRC - (promedioAvance / 100) * DONUT_CIRC;
+
+    // ─── Estilos reutilizables ──────────────────────────────────────────────
+    const kpiCardStyle = {
+        flex: 1,
+        background: 'rgba(255,255,255,0.03)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '14px',
+        padding: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '6px',
+        minWidth: '140px',
+    };
+    const kpiValueStyle = (color) => ({
+        fontSize: '32px',
+        fontWeight: '800',
+        color,
+        lineHeight: '1',
+    });
+    const kpiLabelStyle = {
+        fontSize: '12px',
+        color: 'var(--est-muted)',
+        textTransform: 'uppercase',
+        letterSpacing: '0.05em',
+    };
+
+    const estadoCurso = (progreso) => {
+        if (progreso === 100) return { texto: '✓ Completado', color: '#A3FF4F' };
+        if (progreso === 0)   return { texto: '◦ Sin empezar', color: '#7A8BA8' };
+        return { texto: '⏳ En progreso', color: '#00E5FF' };
+    };
+
     return (
         <div className="est-section-content">
-            <div className="est-perfil-card">
-                <h3 className="est-block-title"><IconChart /> Estadísticas de aprendizaje</h3>
-                <p style={{color:'var(--est-muted)',margin:'8px 0 20px',fontSize:'14px'}}>
-                    Has completado <strong style={{color:'var(--est-cyan)'}}>{data.modulos_completados_total} módulos</strong> en total.
-                </p>
-                <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
-                    {data.detalle_cursos.map((curso, i) => (
-                        <div key={i}>
-                            <div style={{display:'flex',justifyContent:'space-between',marginBottom:'6px'}}>
-                                <span style={{fontSize:'13px',color:'var(--est-text)'}}>{curso.curso}</span>
-                                <span style={{fontSize:'13px',color:curso.color}}>{curso.progreso}% · {curso.completados}/{curso.total} módulos</span>
-                            </div>
-                            <div className="est-progress-bar-wrap">
-                                <div className="est-progress-bar" style={{width:`${curso.progreso}%`,background:curso.color}} />
-                            </div>
-                        </div>
-                    ))}
+
+            {/* ─── KPI CARDS ─────────────────────────────────────────────── */}
+            <div style={{display:'flex',gap:'14px',flexWrap:'wrap',marginBottom:'24px'}}>
+                <div style={kpiCardStyle}>
+                    <span style={kpiValueStyle('#00E5FF')}>{data.modulos_completados_total}</span>
+                    <span style={kpiLabelStyle}>Lecciones completadas</span>
+                </div>
+                <div style={kpiCardStyle}>
+                    <span style={kpiValueStyle('#A3FF4F')}>{totalCursos}</span>
+                    <span style={kpiLabelStyle}>Cursos activos</span>
+                </div>
+                <div style={kpiCardStyle}>
+                    <span style={kpiValueStyle('#7B5CFA')}>{cursosCompletados}</span>
+                    <span style={kpiLabelStyle}>Cursos completados</span>
+                </div>
+                <div style={kpiCardStyle}>
+                    <span style={kpiValueStyle('#FF6B35')}>{promedioAvance}%</span>
+                    <span style={kpiLabelStyle}>Avance promedio</span>
                 </div>
             </div>
+
+            {/* ─── GRID PRINCIPAL: barras + donut ────────────────────────── */}
+            <div style={{display:'grid',gridTemplateColumns:'minmax(0,1.6fr) minmax(0,1fr)',gap:'20px',marginBottom:'24px'}}>
+
+                {/* AVANCE POR CURSO */}
+                <div className="est-perfil-card">
+                    <h3 className="est-block-title" style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'18px'}}>
+                        <IconChart /> Avance por curso
+                    </h3>
+                    {cursos.length === 0 ? (
+                        <p style={{color:'var(--est-muted)',fontSize:'14px',textAlign:'center',padding:'20px'}}>
+                            No tienes cursos activos. Explora el catálogo para inscribirte.
+                        </p>
+                    ) : (
+                        <div style={{display:'flex',flexDirection:'column',gap:'18px'}}>
+                            {cursos.map((curso, i) => {
+                                const estado = estadoCurso(curso.progreso);
+                                return (
+                                    <div key={i} style={{padding:'14px',background:'rgba(255,255,255,0.02)',borderRadius:'10px',borderLeft:`3px solid ${curso.color}`}}>
+                                        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
+                                            <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
+                                                <span style={{width:'10px',height:'10px',borderRadius:'50%',background:curso.color,flexShrink:0}}/>
+                                                <span style={{fontSize:'14px',fontWeight:'600',color:'var(--est-text)'}}>{curso.curso}</span>
+                                            </div>
+                                            <span style={{fontSize:'13px',color:curso.color,fontWeight:'700'}}>{curso.progreso}%</span>
+                                        </div>
+                                        <div className="est-progress-bar-wrap" style={{marginBottom:'8px'}}>
+                                            <div className="est-progress-bar" style={{width:`${curso.progreso}%`,background:curso.color,transition:'width 0.8s ease-out'}}/>
+                                        </div>
+                                        <div style={{display:'flex',justifyContent:'space-between',fontSize:'12px',color:'var(--est-muted)'}}>
+                                            <span>{curso.completados}/{curso.total} módulos</span>
+                                            <span style={{color:estado.color,fontWeight:'600'}}>{estado.texto}</span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    )}
+                </div>
+
+                {/* DONUT + INSIGHT */}
+                <div style={{display:'flex',flexDirection:'column',gap:'20px'}}>
+                    <div className="est-perfil-card" style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'8px'}}>
+                        <h3 className="est-block-title" style={{marginBottom:'8px'}}>Tu avance global</h3>
+                        <svg width={DONUT_SIZE} height={DONUT_SIZE} style={{transform:'rotate(-90deg)'}}>
+                            <circle
+                                cx={DONUT_SIZE/2} cy={DONUT_SIZE/2} r={DONUT_RADIUS}
+                                fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={DONUT_STROKE}
+                            />
+                            <circle
+                                cx={DONUT_SIZE/2} cy={DONUT_SIZE/2} r={DONUT_RADIUS}
+                                fill="none" stroke="url(#donutGrad)" strokeWidth={DONUT_STROKE}
+                                strokeDasharray={DONUT_CIRC}
+                                strokeDashoffset={donutOffset}
+                                strokeLinecap="round"
+                                style={{transition:'stroke-dashoffset 1s ease-out'}}
+                            />
+                            <defs>
+                                <linearGradient id="donutGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%"   stopColor="#00E5FF"/>
+                                    <stop offset="100%" stopColor="#7B5CFA"/>
+                                </linearGradient>
+                            </defs>
+                            <text
+                                x="50%" y="50%"
+                                textAnchor="middle" dominantBaseline="central"
+                                style={{transform:'rotate(90deg)',transformOrigin:'center'}}
+                                fontSize="36" fontWeight="800" fill="#EEF2FF"
+                            >
+                                {promedioAvance}%
+                            </text>
+                        </svg>
+                        <p style={{fontSize:'12px',color:'var(--est-muted)',textTransform:'uppercase',letterSpacing:'0.08em',margin:0}}>
+                            Promedio de cursos
+                        </p>
+                    </div>
+
+                    {/* INSIGHT MOTIVACIONAL */}
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(0,229,255,0.08) 0%, rgba(123,92,250,0.08) 100%)',
+                        border: '1px solid rgba(0,229,255,0.15)',
+                        borderRadius: '14px',
+                        padding: '20px',
+                        display: 'flex',
+                        gap: '14px',
+                        alignItems: 'center',
+                    }}>
+                        <span style={{fontSize:'40px',flexShrink:0}}>{insight.emoji}</span>
+                        <p style={{margin:0,fontSize:'14px',color:'var(--est-text)',lineHeight:'1.5'}}>{insight.texto}</p>
+                    </div>
+                </div>
+            </div>
+
+            {/* ─── RESUMEN COMPARATIVO ───────────────────────────────────── */}
+            {cursos.length > 1 && (
+                <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px'}}>
+                    {cursoLider && cursoLider.progreso > 0 && (
+                        <div style={{padding:'18px',background:'rgba(163,255,79,0.05)',border:'1px solid rgba(163,255,79,0.15)',borderRadius:'12px'}}>
+                            <p style={{margin:'0 0 4px',fontSize:'11px',color:'#A3FF4F',textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:'700'}}>
+                                ⬆ Tu mejor avance
+                            </p>
+                            <p style={{margin:0,fontSize:'15px',color:'var(--est-text)',fontWeight:'600'}}>
+                                {cursoLider.curso}
+                                <span style={{color:'#A3FF4F',marginLeft:'8px'}}>· {cursoLider.progreso}%</span>
+                            </p>
+                        </div>
+                    )}
+                    {cursoPendiente && cursoPendiente !== cursoLider && (
+                        <div style={{padding:'18px',background:'rgba(255,107,53,0.05)',border:'1px solid rgba(255,107,53,0.15)',borderRadius:'12px'}}>
+                            <p style={{margin:'0 0 4px',fontSize:'11px',color:'#FF6B35',textTransform:'uppercase',letterSpacing:'0.08em',fontWeight:'700'}}>
+                                ⬇ Necesita más atención
+                            </p>
+                            <p style={{margin:0,fontSize:'15px',color:'var(--est-text)',fontWeight:'600'}}>
+                                {cursoPendiente.curso}
+                                <span style={{color:'#FF6B35',marginLeft:'8px'}}>· {cursoPendiente.progreso}%</span>
+                            </p>
+                        </div>
+                    )}
+                </div>
+            )}
         </div>
     );
 };
