@@ -7,7 +7,7 @@ from .models import SolicitudDocente
 from .serializers import SolicitudDocenteSerializer
 from apps.usuarios.models import Usuario
 import uuid
-from django.core.mail import send_mail
+from django.core.mail import send_mail, EmailMultiAlternatives
 from django.conf import settings
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
@@ -169,24 +169,122 @@ class RecuperarPasswordView(APIView):
             user = Usuario.objects.get(email=email)
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = default_token_generator.make_token(user)
-            
-            link_recuperacion = f"http://localhost:3000/restablecer-password/{uid}/{token}"
-            
-            asunto = "NEXUS - Recuperación de Acceso"
-            mensaje = (
+
+            # URL dinamica: toma el dominio del request (sirve en dev y prod).
+            # nginx pasa Host correctamente con `proxy_set_header Host $host;`,
+            # asi que Django ve el dominio publico al que el navegador se conecto.
+            base_url = request.build_absolute_uri('/').rstrip('/')
+            link_recuperacion = f"{base_url}/restablecer-password/{uid}/{token}"
+
+            asunto = "NEXUS - Recuperacion de Acceso"
+
+            # Fallback en texto plano (para clientes de correo sin HTML)
+            mensaje_texto = (
                 f"Hola {user.nombre},\n\n"
-                f"Para restablecer tu contraseña en NEXUS ID, haz clic en el siguiente enlace:\n\n"
+                f"Para restablecer tu contrasena en NEXUS ID, haz clic en el siguiente enlace:\n\n"
                 f"{link_recuperacion}\n\n"
-                f"Este enlace es válido por tiempo limitado. Si no solicitaste esto, ignora este correo."
+                f"Este enlace es valido por tiempo limitado. Si no solicitaste esto, ignora este correo."
             )
-            
-            send_mail(
-                asunto,
-                mensaje,
-                settings.EMAIL_HOST_USER,
-                [email],
-                fail_silently=False,
+
+            # Version HTML con branding NEXUS (estilos inline porque los
+            # clientes de correo no procesan CSS externo)
+            mensaje_html = f"""\
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEXUS - Recuperacion de Acceso</title>
+</head>
+<body style="margin:0; padding:0; background-color:#060b14; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#060b14; padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px; background-color:#0d1424; border:1px solid rgba(0,229,255,0.15); border-radius:16px; overflow:hidden;">
+
+          <!-- Header con logo -->
+          <tr>
+            <td align="center" style="padding:40px 30px 20px 30px; background:linear-gradient(135deg, #0d1424 0%, #131c30 100%); border-bottom:1px solid rgba(0,229,255,0.1);">
+              <h1 style="margin:0; font-size:36px; font-weight:800; letter-spacing:2px; color:#eef2ff;">
+                NEX<span style="color:#00e5ff;">US</span>
+              </h1>
+              <p style="margin:8px 0 0 0; font-size:11px; letter-spacing:3px; color:#00e5ff; text-transform:uppercase; font-weight:600;">
+                Recuperacion de Acceso
+              </p>
+            </td>
+          </tr>
+
+          <!-- Cuerpo del mensaje -->
+          <tr>
+            <td style="padding:36px 40px 20px 40px;">
+              <h2 style="margin:0 0 16px 0; font-size:22px; color:#eef2ff; font-weight:700;">
+                Hola, {user.nombre}
+              </h2>
+              <p style="margin:0 0 24px 0; font-size:15px; line-height:1.6; color:#a8b3cf;">
+                Recibimos una solicitud para restablecer la contrasena de tu cuenta en
+                <strong style="color:#eef2ff;">NEXUS ID</strong>. Para continuar con el proceso,
+                haz clic en el siguiente boton:
+              </p>
+
+              <!-- Boton CTA -->
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                <tr>
+                  <td align="center" style="padding:8px 0 28px 0;">
+                    <a href="{link_recuperacion}"
+                       style="display:inline-block; padding:14px 38px; background-color:#00e5ff; color:#060b14; text-decoration:none; font-weight:700; font-size:15px; border-radius:10px; letter-spacing:0.5px; box-shadow:0 4px 20px rgba(0,229,255,0.3);">
+                      Restablecer contrasena &rarr;
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Link alternativo -->
+              <p style="margin:0 0 8px 0; font-size:13px; color:#7a8ba8;">
+                Si el boton no funciona, copia y pega este enlace en tu navegador:
+              </p>
+              <p style="margin:0 0 24px 0; font-size:12px; color:#00e5ff; word-break:break-all; padding:12px; background-color:#060b14; border-radius:8px; border:1px solid rgba(0,229,255,0.1);">
+                {link_recuperacion}
+              </p>
+
+              <!-- Aviso de seguridad -->
+              <div style="padding:16px; background-color:rgba(255,193,7,0.08); border-left:3px solid #ffc107; border-radius:6px; margin-top:8px;">
+                <p style="margin:0; font-size:13px; color:#cdd5e5; line-height:1.5;">
+                  <strong style="color:#ffc107;">Importante:</strong> Este enlace es valido por tiempo limitado.
+                  Si tu no solicitaste cambiar tu contrasena, puedes ignorar este correo de forma segura.
+                </p>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:24px 30px 32px 30px; border-top:1px solid rgba(0,229,255,0.08);">
+              <p style="margin:0 0 6px 0; font-size:12px; color:#7a8ba8;">
+                Este correo fue enviado automaticamente, por favor no respondas a este mensaje.
+              </p>
+              <p style="margin:0; font-size:11px; color:#5a6781; letter-spacing:0.5px;">
+                &copy; NEXUS &middot; Educacion en TI &middot; Medellin
+              </p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
+"""
+
+            # Enviar con texto plano + HTML (multipart)
+            email_msg = EmailMultiAlternatives(
+                subject=asunto,
+                body=mensaje_texto,
+                from_email=settings.EMAIL_HOST_USER,
+                to=[email],
             )
+            email_msg.attach_alternative(mensaje_html, "text/html")
+            email_msg.send(fail_silently=False)
 
             return Response(
                 {"mensaje": "Si el correo coincide con nuestros registros, recibirás el enlace pronto."},
