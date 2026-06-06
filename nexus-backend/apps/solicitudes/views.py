@@ -181,13 +181,12 @@ class RecuperarPasswordView(APIView):
             # Fallback en texto plano (para clientes de correo sin HTML)
             mensaje_texto = (
                 f"Hola {user.nombre},\n\n"
-                f"Para restablecer tu contrasena en NEXUS ID, haz clic en el siguiente enlace:\n\n"
+                f"Para restablecer tu contraseña en NEXUS ID, haz clic en el siguiente enlace:\n\n"
                 f"{link_recuperacion}\n\n"
                 f"Este enlace es valido por tiempo limitado. Si no solicitaste esto, ignora este correo."
             )
 
-            # Version HTML con branding NEXUS (estilos inline porque los
-            # clientes de correo no procesan CSS externo)
+            
             mensaje_html = f"""\
 <!DOCTYPE html>
 <html lang="es">
@@ -196,11 +195,11 @@ class RecuperarPasswordView(APIView):
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NEXUS - Recuperacion de Acceso</title>
 </head>
-<body style="margin:0; padding:0; background-color:#060b14; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
-  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#060b14; padding:40px 20px;">
+<body style="margin:0; padding:0; background-color:#f4f6fb; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+  <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background-color:#f4f6fb; padding:40px 20px;">
     <tr>
       <td align="center">
-        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px; background-color:#0d1424; border:1px solid rgba(0,229,255,0.15); border-radius:16px; overflow:hidden;">
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="560" style="max-width:560px; background-color:#0d1424; border:1px solid rgba(0,229,255,0.15); border-radius:16px; overflow:hidden; box-shadow:0 8px 32px rgba(13,20,36,0.15);">
 
           <!-- Header con logo -->
           <tr>
@@ -221,7 +220,7 @@ class RecuperarPasswordView(APIView):
                 Hola, {user.nombre}
               </h2>
               <p style="margin:0 0 24px 0; font-size:15px; line-height:1.6; color:#a8b3cf;">
-                Recibimos una solicitud para restablecer la contrasena de tu cuenta en
+                Recibimos una solicitud para restablecer la contraseña de tu cuenta en
                 <strong style="color:#eef2ff;">NEXUS ID</strong>. Para continuar con el proceso,
                 haz clic en el siguiente boton:
               </p>
@@ -232,7 +231,7 @@ class RecuperarPasswordView(APIView):
                   <td align="center" style="padding:8px 0 28px 0;">
                     <a href="{link_recuperacion}"
                        style="display:inline-block; padding:14px 38px; background-color:#00e5ff; color:#060b14; text-decoration:none; font-weight:700; font-size:15px; border-radius:10px; letter-spacing:0.5px; box-shadow:0 4px 20px rgba(0,229,255,0.3);">
-                      Restablecer contrasena &rarr;
+                      Restablecer contraseña &rarr;
                     </a>
                   </td>
                 </tr>
@@ -250,7 +249,7 @@ class RecuperarPasswordView(APIView):
               <div style="padding:16px; background-color:rgba(255,193,7,0.08); border-left:3px solid #ffc107; border-radius:6px; margin-top:8px;">
                 <p style="margin:0; font-size:13px; color:#cdd5e5; line-height:1.5;">
                   <strong style="color:#ffc107;">Importante:</strong> Este enlace es valido por tiempo limitado.
-                  Si tu no solicitaste cambiar tu contrasena, puedes ignorar este correo de forma segura.
+                  Si tu no solicitaste cambiar tu contraseña, puedes ignorar este correo de forma segura.
                 </p>
               </div>
             </td>
