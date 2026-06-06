@@ -48,7 +48,7 @@ class ResumenEstudianteView(APIView):
         ).select_related('leccion__modulo__curso').order_by('-fecha')[:5]
 
         actividad = [{
-            'texto': f'Completaste la lecciÃ³n "{lv.leccion.titulo}" en {lv.leccion.modulo.curso.nombre}',
+            'texto': f'Completaste la lección "{lv.leccion.titulo}" en {lv.leccion.modulo.curso.nombre}',
             'tiempo': f'Hace {timesince(lv.fecha)}',
             'color': lv.leccion.modulo.curso.color,
         } for lv in recientes]
