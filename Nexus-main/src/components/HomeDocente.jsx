@@ -217,6 +217,14 @@ export default function HomeDocente() {
     const [passMsg, setPassMsg] = useState('');
     const [showPass, setShowPass] = useState({ actual: false, nueva: false, confirmar: false });
 
+    // Estado de recursos elevado al componente padre.
+    // (Antes estaba dentro de VistaCursos, pero como VistaCursos se redefine
+    //  en cada render de HomeDocente, React lo desmontaba y montaba en cada
+    //  cambio de estado, perdiendo los recursos cargados.)
+    const [recursos,    setRecursos]    = useState([]);
+    const [loadingRec,  setLoadingRec]  = useState(false);
+    const [msgRec,      setMsgRec]      = useState('');
+
     const nombre = localStorage.getItem('userName') || 'Docente';
     const email = localStorage.getItem('email') || '';
     const especialidad = localStorage.getItem('especialidad') || 'Docente NEXUS';
@@ -232,6 +240,22 @@ export default function HomeDocente() {
             if (res.data.foto_perfil) setAvatar(res.data.foto_perfil);
         }).catch(() => {});
     }, []);
+
+    // Cargar recursos cada vez que cambie el curso seleccionado.
+    // Esto se ejecuta tras cualquier remount del componente porque vive en el padre.
+    useEffect(() => {
+        if (!cursoActivo) { setRecursos([]); return; }
+        setLoadingRec(true);
+        setMsgRec('');
+        axios.get(`/api/docente/cursos/${cursoActivo.id}/recursos/`, authHeaders())
+            .then(res => setRecursos(res.data))
+            .catch(err => {
+                console.error('Error al cargar recursos:', err.response?.status, err.response?.data);
+                setRecursos([]);
+                setMsgRec(`err:No se pudieron cargar los recursos (${err.response?.status || 'sin conexion'}).`);
+            })
+            .finally(() => setLoadingRec(false));
+    }, [cursoActivo]);
 
     const cerrarSesion = async () => {
         const ok = await showConfirm('Seras redirigido al inicio de sesion.', {
@@ -348,13 +372,11 @@ export default function HomeDocente() {
         const [loading, setLoading] = useState(true);
         const [error, setError] = useState('');
 
-        // Estado para recursos del curso seleccionado
-        const [recursos, setRecursos] = useState([]);
-        const [loadingRec, setLoadingRec] = useState(false);
-        const [subiendoRec, setSubiendoRec] = useState(false);
-        const [msgRec, setMsgRec] = useState('');
-        const [nombreArchivo, setNombreArchivo] = useState('');
-        const [archivoSel, setArchivoSel] = useState(null);
+        // Estado LOCAL para el formulario de subida (no se comparte con padre)
+        // Los estados de recursos/loadingRec/msgRec viven en HomeDocente para sobrevivir remounts.
+        const [subiendoRec,    setSubiendoRec]    = useState(false);
+        const [nombreArchivo,  setNombreArchivo]  = useState('');
+        const [archivoSel,     setArchivoSel]     = useState(null);
 
         useEffect(() => {
             axios.get('/api/docente/cursos/', authHeaders())
@@ -363,16 +385,12 @@ export default function HomeDocente() {
                 .finally(() => setLoading(false));
         }, []);
 
+        // Selecciona el curso y limpia el formulario. La carga de recursos
+        // la hace el useEffect del padre escuchando cursoActivo.
         const verDetalle = (curso) => {
             setCursoActivo(curso);
-            setLoadingRec(true);
-            setMsgRec('');
             setArchivoSel(null);
             setNombreArchivo('');
-            axios.get(`/api/docente/cursos/${curso.id}/recursos/`, authHeaders())
-                .then(res => setRecursos(res.data))
-                .catch(() => setRecursos([]))
-                .finally(() => setLoadingRec(false));
         };
 
         const handleArchivoChange = (e) => {

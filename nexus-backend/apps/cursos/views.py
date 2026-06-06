@@ -224,8 +224,8 @@ class InscribirseView(APIView):
 
 class AdminCursosView(APIView):
     """
-    GET  /api/admin/cursos/         â lista todos los cursos
-    POST /api/admin/cursos/         â crea un curso nuevo
+    GET  /api/admin/cursos/         → lista todos los cursos
+    POST /api/admin/cursos/         → crea un curso nuevo
     """
     permission_classes = [IsAuthenticated]
 
@@ -242,7 +242,7 @@ class AdminCursosView(APIView):
             'color':       c.color,
             'activo':      c.activo,
             'docente_id':  str(c.docente.id) if c.docente else None,
-            'docente':     c.docente.nombre if c.docente else 'â',
+            'docente':     c.docente.nombre if c.docente else '—',
             'num_modulos': c.modulos.count(),
             'inscritos':   c.inscripciones.count(),
         } for c in cursos]
@@ -285,8 +285,8 @@ class AdminCursosView(APIView):
 
 class AdminCursoDetalleView(APIView):
     """
-    PATCH  /api/admin/cursos/<id>/  â activa o desactiva un curso
-    DELETE /api/admin/cursos/<id>/  â elimina un curso
+    PATCH  /api/admin/cursos/<id>/  → activa o desactiva un curso
+    DELETE /api/admin/cursos/<id>/  → elimina un curso
     """
     permission_classes = [IsAuthenticated]
 
@@ -451,8 +451,8 @@ class DocenteResumenView(APIView):
 
 class RecursosView(APIView):
     """
-    GET  /api/docente/cursos/<id>/recursos/  â lista recursos del curso
-    POST /api/docente/cursos/<id>/recursos/  â sube un archivo
+    GET  /api/docente/cursos/<id>/recursos/  → lista recursos del curso
+    POST /api/docente/cursos/<id>/recursos/  → sube un archivo
     """
     permission_classes = [IsAuthenticated]
 
@@ -552,7 +552,7 @@ def youtube_embed(url):
 
 class AdminContenidoCursoView(APIView):
     """
-    GET  /api/admin/cursos/<id>/contenido/  â mÃ³dulos y lecciones del curso
+    GET  /api/admin/cursos/<id>/contenido/  → módulos y lecciones del curso
     """
     permission_classes = [IsAuthenticated]
 
@@ -587,8 +587,8 @@ class AdminContenidoCursoView(APIView):
 
 class AdminModuloView(APIView):
     """
-    POST   /api/admin/cursos/<id>/modulos/        â crear mÃ³dulo
-    DELETE /api/admin/modulos/<modulo_id>/        â eliminar mÃ³dulo
+    POST   /api/admin/cursos/<id>/modulos/        → crear módulo
+    DELETE /api/admin/modulos/<modulo_id>/        → eliminar módulo
     """
     permission_classes = [IsAuthenticated]
 
@@ -625,7 +625,7 @@ class AdminModuloDetalleView(APIView):
 
 class AdminLeccionView(APIView):
     """
-    POST /api/admin/modulos/<modulo_id>/lecciones/  â crear lecciÃ³n con video
+    POST /api/admin/modulos/<modulo_id>/lecciones/   crear lección con video
     """
     permission_classes = [IsAuthenticated]
 
@@ -677,7 +677,7 @@ class AdminLeccionDetalleView(APIView):
 class EstudianteCursoContenidoView(APIView):
     """
     GET /api/estudiante/cursos/<id>/contenido/
-    Contenido del curso para el estudiante â mÃ³dulos, lecciones y cuÃ¡les ha visto.
+    Contenido del curso para el estudiante — módulos, lecciones y cuáles ha visto.
     """
     permission_classes = [IsAuthenticated]
 
@@ -855,10 +855,10 @@ class NexIAChatView(APIView):
     y consulta Claude (Anthropic) para generar una respuesta personalizada.
 
     Body: {
-        "mensaje": "Â¿CuÃ¡nto llevo en Python?",
-        "historial": [                       # opcional, Ãºltimos N turnos
+        "mensaje": "¿Cuánto llevo en Python?",
+        "historial": [                       # opcional, Últimos N turnos
             {"rol": "user",      "texto": "Hola"},
-            {"rol": "assistant", "texto": "Â¡Hola! Soy NexIA..."}
+            {"rol": "assistant", "texto": "¡Hola! Soy NexIA..."}
         ]
     }
     """
@@ -990,7 +990,7 @@ def _construir_contexto(estudiante):
             'progreso':    progreso,
             'vistas':      vistas,
             'total':       total_lecciones,
-            'proxima':     proxima or 'curso completado â',
+            'proxima':     proxima or 'curso completado',
         })
 
     # Rutas inscritas
@@ -1031,10 +1031,10 @@ def _system_prompt(estudiante, ctx):
     cursos_texto = ''
     for c in ctx['cursos']:
         cursos_texto += (
-            f"  â¢ {c['nombre']} ({c['tecnologia']}) â "
+            f"  — {c['nombre']} ({c['tecnologia']}) — "
             f"{c['progreso']}% completado ({c['vistas']}/{c['total']} lecciones). "
             f"Docente: {c['docente']}. "
-            f"PrÃ³xima lecciÃ³n pendiente: {c['proxima']}\n"
+            f"Próxima lección pendiente: {c['proxima']}\n"
         )
     if not cursos_texto:
         cursos_texto = '  (El estudiante no tiene cursos inscritos aÃºn)\n'
