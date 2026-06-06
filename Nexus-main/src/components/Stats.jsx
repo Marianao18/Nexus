@@ -2,9 +2,9 @@ import React, { useEffect, useRef } from 'react';
 import styles from './Stats.module.css';
 
 const STATS = [
-  { number: '+12k', label: 'Estudiantes activos',    accent: 'cyan'   },
-  { number: '200+', label: 'Recursos disponibles',   accent: 'lime'   },
-  { number: '18',   label: 'Rutas de aprendizaje',   accent: 'purple' },
+  { number: 'IA', label: 'Asistente Personalizado',    accent: 'cyan'   },
+  { number: '24/7', label: 'Acceso a la plataforma',   accent: 'lime'   },
+  { number: '3+',   label: 'Rutas de aprendizaje',   accent: 'purple' },
   { number: '0',    label: 'Costo de acceso',         accent: 'orange' },
 ];
 

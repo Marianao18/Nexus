@@ -32,7 +32,7 @@ export default function Terminal() {
         <span className={`${styles.dot} ${styles.red}`} />
         <span className={`${styles.dot} ${styles.yellow}`} />
         <span className={`${styles.dot} ${styles.green}`} />
-        <span className={styles.title}>nexus — asistente IA</span>
+        <span className={styles.title}>NexIA</span>
       </div>
       <div className={styles.body}>
         {LINES.map((line, i) => {
