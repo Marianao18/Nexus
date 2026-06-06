@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import axios from 'axios';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import styles from './NexIA.module.css';
 
-// ── Chips de sugerencias iniciales 
+// ── Chips de sugerencias iniciales ───────────────────────────────────────────
 const CHIPS_INICIALES = [
     { label: '¿Qué estudio hoy?',   msg: '¿Qué me recomiendas estudiar hoy según mi progreso?' },
     { label: 'Mi progreso',          msg: '¿Cuánto he avanzado en mis cursos?' },
@@ -13,7 +15,7 @@ const CHIPS_INICIALES = [
 export default function NexIA() {
     const [abierto, setAbierto]           = useState(false);
     const [mensajes, setMensajes]         = useState([
-        { rol: 'ai', texto: '¡Hola! Soy <strong>NexIA</strong>, tu asistente de aprendizaje en NEXUS. Puedo ayudarte con tus cursos, tu progreso y cualquier duda técnica. ¿En qué te puedo ayudar hoy?' }
+        { rol: 'ai', texto: '¡Hola! Soy **NexIA**, tu asistente de aprendizaje en NEXUS. Puedo ayudarte con tus cursos, tu progreso y cualquier duda técnica. ¿En qué te puedo ayudar hoy?' }
     ]);
     const [input, setInput]               = useState('');
     const [cargando, setCargando]         = useState(false);
@@ -54,7 +56,7 @@ export default function NexIA() {
         const conversacion = mensajesActuales.slice(1);
         return conversacion.slice(-10).map(m => ({
             rol:   m.rol === 'user' ? 'user' : 'assistant',
-            texto: m.texto.replace(/<[^>]*>/g, ''),  // limpiar HTML tags
+            texto: m.texto,
         }));
     }, []);
 
@@ -224,10 +226,19 @@ export default function NexIA() {
                                 key={i}
                                 className={`${styles.msg} ${m.rol === 'user' ? styles.user : styles.ai} ${m.esError ? styles.msgError : ''}`}
                             >
-                                <div
-                                    className={styles.msgBubble}
-                                    dangerouslySetInnerHTML={{ __html: m.texto }}
-                                />
+                                <div className={styles.msgBubble}>
+                                    <ReactMarkdown
+                                        remarkPlugins={[remarkGfm]}
+                                        components={{
+                                            // Abrir links externos en nueva pestaña
+                                            a: ({ node, ...props }) => (
+                                                <a {...props} target="_blank" rel="noopener noreferrer" />
+                                            ),
+                                        }}
+                                    >
+                                        {m.texto}
+                                    </ReactMarkdown>
+                                </div>
                                 <span className={styles.msgTime}>
                                     {i === 0 ? 'Inicio' : 'Ahora'}
                                 </span>

@@ -222,6 +222,108 @@
     border-bottom-right-radius: 4px;
 }
 
+/* ─── Estilos de elementos markdown dentro de la burbuja ─────────────── */
+.msgBubble p {
+    margin: 0 0 8px 0;
+}
+.msgBubble p:last-child {
+    margin-bottom: 0;
+}
+.msgBubble strong {
+    color: #00E5FF;
+    font-weight: 700;
+}
+.msg.user .msgBubble strong {
+    color: #EEF2FF;
+}
+.msgBubble em {
+    font-style: italic;
+    color: #cdd5e5;
+}
+.msgBubble ul, .msgBubble ol {
+    margin: 6px 0 8px 0;
+    padding-left: 20px;
+}
+.msgBubble li {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+.msgBubble li::marker {
+    color: #00E5FF;
+}
+.msgBubble code {
+    background: rgba(0, 0, 0, 0.4);
+    color: #A3FF4F;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 11.5px;
+    border: 1px solid rgba(163, 255, 79, 0.15);
+}
+.msgBubble pre {
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin: 8px 0;
+    overflow-x: auto;
+    font-family: 'Space Mono', 'Courier New', monospace;
+    font-size: 11.5px;
+    line-height: 1.5;
+}
+.msgBubble pre code {
+    background: transparent;
+    border: none;
+    padding: 0;
+    color: #EEF2FF;
+}
+.msgBubble a {
+    color: #00E5FF;
+    text-decoration: underline;
+    text-decoration-color: rgba(0, 229, 255, 0.4);
+    text-underline-offset: 2px;
+}
+.msgBubble a:hover {
+    text-decoration-color: #00E5FF;
+}
+.msgBubble h1, .msgBubble h2, .msgBubble h3, .msgBubble h4 {
+    margin: 8px 0 4px 0;
+    color: #EEF2FF;
+    font-weight: 700;
+}
+.msgBubble h1 { font-size: 15px; }
+.msgBubble h2 { font-size: 14px; }
+.msgBubble h3 { font-size: 13px; }
+.msgBubble h4 { font-size: 12.5px; }
+.msgBubble blockquote {
+    border-left: 3px solid #00E5FF;
+    padding-left: 10px;
+    margin: 8px 0;
+    color: #a8b3cf;
+    font-style: italic;
+}
+.msgBubble hr {
+    border: none;
+    border-top: 1px solid rgba(0, 229, 255, 0.12);
+    margin: 10px 0;
+}
+.msgBubble table {
+    border-collapse: collapse;
+    margin: 8px 0;
+    width: 100%;
+    font-size: 11.5px;
+}
+.msgBubble th, .msgBubble td {
+    border: 1px solid rgba(0, 229, 255, 0.15);
+    padding: 4px 8px;
+    text-align: left;
+}
+.msgBubble th {
+    background: rgba(0, 229, 255, 0.08);
+    color: #00E5FF;
+    font-weight: 600;
+}
+
 .msgTime {
     font-family: 'Space Mono', monospace;
     font-size: 8px;
