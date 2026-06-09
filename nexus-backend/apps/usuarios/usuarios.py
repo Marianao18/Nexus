@@ -10,7 +10,7 @@ from .serializers import RegistroSerializer
 from .models import Usuario
 
 
-# ─── HTML del correo de bienvenida al estudiante    ──────────────────────────────
+# ─── HTML del correo de bienvenida al estudiante ──────────────────────────────
 # (usa {nombre} y {link_login} como placeholders de .format())
 _RENDER_BIENVENIDA_ESTUDIANTE = """\
 <!DOCTYPE html>
